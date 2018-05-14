@@ -1,0 +1,4 @@
+[submodule "openexr-wrap-em"]
+	path = openexr-wrap-em
+	url = ../openexr-wrap-em.git
+	branch = master

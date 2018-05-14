@@ -1,0 +1,9 @@
+.*
+**/tsconfig.json
+**/webpack.config.js
+node_modules/
+/src/
+/openexr-wrap-em/
+/documentation/
+/build_web/examples
+/jeriview-*.tgz
