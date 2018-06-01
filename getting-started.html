@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="theme-color" content="rgb(27, 63, 86)">
+    <title>Getting started with JERI</title>
+    <link rel="stylesheet" href="vendor/bootstrap-4.1.0/css/bootstrap.min.css">
+    <link rel="stylesheet" href="fonts.css">
+    <link rel="stylesheet" href="vendor/prism/prism.css">
+    <link rel="stylesheet" href="jeri-website.css">
+    <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+    <link rel="manifest" href="site.webmanifest">
+    <link rel="mask-icon" href="safari-pinned-tab.svg" color="#5bbad5">
+    <meta name="msapplication-TileColor" content="#00aba9">
+    <meta name="theme-color" content="#ffffff">
+</head>
+
+<body>
+    <div class="App">
+        <nav class="navbar navbar-expand-lg navbar-light bg-light">
+            <div class="container">
+                <a class="navbar-brand" href="index.html">
+                    <img src="img/logos/Jeri_Logo_Text.png" style="height: 2em" alt="JERI">
+                </a>
+                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent"
+                    aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <div class="collapse navbar-collapse" id="footerSupportedContent" style="float: right">
+                    <ul class="navbar-nav">
+                        <li class="nav-item">
+                            <a class="nav-link" href="#">Docs</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#examples">Examples</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="https://github.com/disneyresearch/jeri">Github</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+        <div class="doc-container">
+            <div class="container">
+                <div class="row">
+                    <div class="col-xl-8">
+                        <h3>Getting started</h3>
+                        <p>The easiest way to get started with the JERI viewer is to download the
+                            <a href="release/jeriview-0.3.6.zip">latest release</a>. It contains all required scripts and a directory with examples of usage.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="learn-by-example-container">
+        <a class="btn btn-lg" href="release/jeriview-0.3.6.zip">Download JERI 0.3.6</a>
+    </div>
+
+    <div class="doc-container">
+        <div class="container">
+            <div class="row">
+                <div class="col-xl-8">
+                    <h3>Viewing examples</h3>
+                    <p>To view the examples, run a local web server in the release directory.</p>
+                    <pre><code class="language-bash">
+python -m SimpleHTTPServer 8000; # Python 2
+python3 -m http.server 8000; # Python 3
+npm install -g serve && serve -s . -p 8000 # JavaScript
+</code></pre>
+                    <p>This serves the examples at
+                        <a href="http://localhost:8000/examples">http://localhost:8000/examples</a>.</p>
+
+                    <p>Because of the cross-origin resource sharing policy in browsers, JERI only works when hosted using a
+                        web server. A page containing JERI does
+                        <strong>not</strong> work properly when opened using the
+                        <code>file://</code> protocol.</p>
+
+                    <h3>Embedding JERI</h3>
+                    <p>Load the
+                        <code>JeriView</code> library and its dependency
+                        <a href="https://reactjs.org/">React</a>:</p>
+                    <pre><code class="language-html">
+&lt;script src="https://cdnjs.cloudflare.com/ajax/libs/react/15.6.1/react.js"&gt;&lt;/script&gt;
+&lt;script src="https://cdnjs.cloudflare.com/ajax/libs/react/15.6.1/react-dom.js"&gt;&lt;/script&gt;
+&lt;script src="jeriview.js"&gt;&lt;/script&gt;
+</code></pre>
+
+                    <p>Next, describe the hierarchical menu structure of the viewer, like this:</p>
+                    <pre><code class="language-js">
+const data = {
+  title: 'root',
+  children: [
+    {
+      title: 'Living room',
+      children: [ // Arbitrary tree-structured nesting of tabs
+        {
+          title: 'Denoised',
+          image: 'images/test_image.exr',
+        },
+        {
+          title: 'Input',
+          image: 'images/test_input.exr',
+        },
+        {
+          title: 'Reference',
+          image: 'images/test_reference.exr',
+        },
+        {
+          title: '1-SSIM',
+          lossMap: { // JERI can automatically compute false-color error-maps for SSIM, L1, MSE, rMSE, SMAPE
+            function: 'SSIM',
+            imageA: 'images/test_image.exr',
+            imageB: 'images/test_reference.exr',
+          }
+          tonemapGroup: 'other', // A non-default `tonemapGroup` decouples exposure control from images in other groups.
+        },
+        {
+          title: 'L1',
+          tonemapGroup: 'other',
+          lossMap: {
+            function: 'L1',
+            imageA: 'images/test_image.exr',
+            imageB: 'images/test_reference.exr',
+          }
+        },
+        {
+          title: 'MrSE',
+          tonemapGroup: 'other',
+          lossMap: {
+            function: 'MRSE',
+            imageA: 'images/test_image.exr',
+            imageB: 'images/test_reference.exr',
+          }
+        },
+      ]
+    },
+    {
+      title: 'Mountains',
+      image: 'images/test_image.jpg',
+    },
+  ]
+};
+</code></pre>
+                    <p>To render the viewer, create a container element and call JERI:</p>
+                    <pre><code class="language-html">
+&lt;div id="my-viewer" style="width: 100%; height: 600px;"&gt;&lt;/div&gt;
+&lt;script&gt;
+  const data = ...;
+  // Call renderViewer as often as you want, any time the data changes
+  // Updates are cheap, efficient, and state is preserved
+  JeriView.renderViewer(document.getElementById('my-viewer'), data);
+&lt;/script&gt;
+</code></pre>
+
+                    <h3>Webworker scripts</h3>
+                    <p>JERI parses EXR files using a version of OpenEXR compiled with
+                        <a href="http://kripken.github.io/emscripten-site/index.html">emscripten</a>. The parsing happens asynchronously using webworkers. For this reason,
+                        <code>jeriview.js</code> will look for three files:</p>
+                    <pre><code class="language-bash">
+exr.worker.js # the webworker
+exr-wrap.js # a compiled OpenEXR library
+exr-wrap.js.mem # an emscripten memory file for the compiled OpenEXR library
+</code></pre>
+                    <p>
+                        By default, these files are expected to be served from the root of the web server (/exr.worker.js etc.) If the files are
+                        served from another path, you need to change base url in two scripts:
+                    </p>
+                    <pre><code class="language-js">
+// jeriview.js
+__webpack_require__.p = "/";
+// exr.worker.js
+__webpack_require__.p = "/";
+</code></pre>
+                    <h3>Building and NPM</h3>
+                    <p>To customize JERI to fit your own application or to contribute to its development, follow the
+                        <a href="https://github.com/disneyresearch/jeri/README.md">README</a> on Github. It contains instructions on building JERI yourself. This requires NPM and is
+                        based on Webpack.</p>
+                    <p>If you are using JERI in an React app built with Webpack, the documentation on Github also outlines how
+                        to install JERI through NPM and use it in an app that uses .
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <nav class="navbar navbar-expand-lg navbar-dark navbar-footer">
+        <div class="container">
+            <a class="navbar-brand mr-auto" href="#">
+                <img src="img/logos/Jeri_Logo_Text_white.png" style="height: 2em" alt="JERI">
+            </a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#footerSupportedContent" aria-controls="navbarSupportedContent"
+                aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="footerSupportedContent">
+                <ul class="navbar-nav ml-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="https://www.disneyresearch.com/">Disney Research</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="https://github.com/disneyresearch/jeri/LICENSE">License</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react/15.6.1/react.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react/15.6.1/react-dom.js"></script>
+    <script src="vendor/jeri/jeriview.min.js"></script>
+    <script src="vendor/prism/prism.js"></script>
+    <script src="jeri-website.js"></script>
+</body>
+
+</html>

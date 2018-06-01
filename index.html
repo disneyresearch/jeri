@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="theme-color" content="rgb(27, 63, 86)">
+    <title>JERI: JavaScript Extended Range ImageViewer</title>
+    <link rel="stylesheet" href="vendor/bootstrap-4.1.0/css/bootstrap.min.css">
+    <link rel="stylesheet" href="fonts.css">
+    <link rel="stylesheet" href="vendor/prism/prism.css">
+    <link rel="stylesheet" href="jeri-website.css">
+    <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
+    <link rel="manifest" href="site.webmanifest">
+    <link rel="mask-icon" href="safari-pinned-tab.svg" color="#5bbad5">
+    <meta name="msapplication-TileColor" content="#00aba9">
+    <meta name="theme-color" content="#ffffff">
+</head>
+
+<body>
+    <div class="App">
+        <nav class="navbar navbar-expand-lg navbar-light bg-light">
+            <div class="container">
+                <a class="navbar-brand" href="index.html">
+                    <img src="./img/logos/Jeri_Logo_Text.png" style="height: 2em" alt="JERI">
+                </a>
+                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent"
+                    aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <div class="collapse navbar-collapse" id="footerSupportedContent" style="float: right">
+                    <ul class="navbar-nav">
+                        <li class="nav-item">
+                            <a class="nav-link" href="getting-started.html">Docs</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#examples">Examples</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="https://github.com/disneyresearch/jeri">Github</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+        <div class="hero">
+            <div class="container">
+                <h1 class="hero-title">JERI</h1>
+                <p class="hero-subtitle">Javascript Extended-Range Image</p>
+                <p class="hero-subsubtitle">viewer</p>
+                <div class="hero-buttons row justify-content-md-center">
+                    <div class="col-3">
+                        <a class="hero-button hero-button-primary" href="getting-started.html">Get Started</a>
+                    </div>
+                    <div class="col-4 col-lg-3">
+                        <a class="hero-button hero-button-secondary" href="#examples">Examples</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="demo-area-container">
+            <div class="demo-area-black-bar"></div>
+            <div class="container">
+                <div class="demo-area">
+                    <div class="jeri-view" data-data='{
+                        "title": "root",
+                        "children": [
+                            { "title": "Rendering", "image": "./img/living-room-input.exr" },
+                            { "title": "Denoised", "image": "./img/living-room.exr" },
+                            { "title": "Reference", "image": "./img/living-room-ref.exr" },
+                            { "title": "SSIM", "lossMap": {
+                                "function": "SSIM",
+                                "tonemapGroup": "SSIM",
+                                "imageA": "./img/living-room-ref.exr",
+                                "imageB": "./img/living-room.exr"
+                            } }
+                        ]
+                    }'>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="intro-text-container">
+            <div class="container">
+                <div class="row">
+                    <div class="col">
+                        <h2>Share HDR Content Online</h2>
+                        <p>
+                            JERI allows displaying EXR images inside a website. The viewer is built on top of OpenEXR and provides a simple user interface for efficient navigation. The EXR files (JPEGs and PNGs are supported too) are specified using a JSON string and loaded on demand, asynchronously and cached for best user experience.
+                        </p>
+                    </div>
+                    <div class="col">
+                        <h2>The Best Way to Compare</h2>
+                        <p>
+                            The viewer was designed for quick and intuitive comparisons of many images. It features a multi-level image selector and keyboard bindings for easy navigation through large image sets.
+                            Correct the exposure, visualize various error maps, and zoom in excessively to see pixel values in text!
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="examples-container" id="examples">
+            <div class="container">
+                <div class="row code-example code-example-js">
+                    <div class="col-4">
+                        <h2>Toggling between Images</h2>
+                        <p>
+                            JERI provides a multi-level menu for organizing large sets of images. Once the image is loaded, you can pan, zoom, change exposure (<code>[e]</code> / <code>[E]</code>), or switch to another image using keyboard shortcuts.
+                        </p>
+                        <p>For help: <code>[?]</code></p>
+                    </div>
+                    <div class="col-8">
+                        <ul class="list-inline code-example-nav">
+                            <li class="list-inline-item">
+                                <button class="btn code-example-link code-example-link-code">Code</button>
+                            </li>
+                            <li class="list-inline-item">
+                                <button class="btn code-example-link code-example-link-result">Result</button>
+                            </li>
+                        </ul>
+
+                        <div class="code-example-viewer" style="height: 0; padding-bottom: 62.1%; position: relative">
+                            <div class="jeri-view" data-data='{
+                            "title": "root",
+                            "children": [
+                                {
+                                    "title": "Living room",
+                                    "children": [
+                                        {
+                                        "title": "Input image",
+                                        "image": "./img/living-room-input.exr"
+                                        },
+                                        {
+                                        "title": "Improved",
+                                        "image": "./img/living-room.exr"
+                                        },
+                                        {
+                                        "title": "Reference",
+                                        "image": "./img/living-room-ref.exr"
+                                        }
+                                    ]
+                                },
+                                {
+                                    "title": "Bed room",
+                                    "children": [
+                                        {
+                                        "title": "Input image",
+                                        "image": "./img/living-room-input.exr"
+                                        },
+                                        {
+                                        "title": "Improved",
+                                        "image": "./img/living-room.exr"
+                                        },
+                                        {
+                                        "title": "Reference",
+                                        "image": "./img/living-room-ref.exr"
+                                        }
+                                    ]
+                                }
+                            ]
+                            }'></div>
+                        </div>
+                        <pre class="code-example-code">
+<code class="language-javascript">
+const config = {
+  title: 'root',
+  children: [
+    {
+      title: 'Living room',
+      children: [
+        { title: 'Input image', image: 'living-room-input.exr' },
+        { title: 'Improved', image: 'living-room-denoised.exr' },
+        { title: 'Reference', image: 'living-room-ref.exr' }
+      ]        
+    },
+    {
+      title: 'Car',
+      children: [
+        { title: 'Input image', image: 'living-room-input.exr' },
+        { title: 'Improved', image: 'living-room-denoised.exr' },
+        { title: 'Reference', image: 'living-room-ref.exr' }
+      ]        
+    }    
+  ]
+};
+JeriView.renderViewer(document.getElementById('root'), config);</code></pre>
+                    </div>
+                </div>
+
+                <div class="row code-example code-example-js">
+                    <div class="col-4">
+                        <h2>Automatic Error Maps</h2>
+                        <p>
+                            When a reference image is available, JERI can compute false-color error maps between two images. The viewer supports L1, L2 (MSE), MAPE, MRSE, SMAPE and SSIM.
+                        </p>
+                    </div>
+                    <div class="col-8">
+                        <ul class="list-inline code-example-nav">
+                            <li class="list-inline-item">
+                                <button class="btn code-example-link code-example-link-code">Code</button>
+                            </li>
+                            <li class="list-inline-item">
+                                <button class="btn code-example-link code-example-link-result">Result</button>
+                            </li>
+                        </ul>
+
+                        <div class="code-example-viewer" style="height: 0; padding-bottom: 62.1%; position: relative">
+                            <div class="jeri-view" data-data='{
+                                "title": "root",
+                                "children": [
+                                    { "title": "Improved", "image": "./img/living-room.exr" },
+                                    { "title": "Reference", "image": "./img/living-room-ref.exr" },
+                                    {
+                                    "title": "SSIM",
+                                    "lossMap": {
+                                        "function": "SSIM",
+                                        "imageA": "./img/living-room.exr",
+                                        "imageB": "./img/living-room-ref.exr"
+                                    }
+                                    }
+                                ]
+                            }'></div>
+                        </div>
+                        <pre class="code-example-code">
+<code class="language-javascript">
+const config = {
+  title: 'root',
+  children: [
+    { title: 'Improved', image: 'living-room.exr' },
+    { title: 'Reference', image: 'living-room-ref.exr' },
+    {
+      title: 'SSIM',
+      lossMap: {
+        'function': 'SSIM',
+        imageA: 'living-room.exr',
+        imageB: 'living-room-ref.exr'
+      }
+    },
+  ]
+};
+JeriView.renderViewer(document.getElementById('root'), config);</code></pre>
+                    </div>
+                </div>
+
+                <div class="row code-example code-example-js">
+                    <div class="col-4">
+                        <h2>Use as a React Component</h2>
+                        <p>
+                            JERI is written in React and built with Webpack. If this matches your setup, you can simply install JERI with <code>npm install jeri</code>, and use it like so:
+                        </p>
+                    </div>
+                    <div class="col-8">
+                        <ul class="list-inline code-example-nav">
+                            <li class="list-inline-item">
+                                <button class="btn code-example-link code-example-link-code">Code</button>
+                            </li>
+                            <li class="list-inline-item">
+                                <button class="btn code-example-link code-example-link-result">Result</button>
+                            </li>
+                        </ul>
+
+                        <div class="code-example-viewer" style="height: 0; padding-bottom: 62.1%; position: relative">
+                            <div id="jeri-view-react-example" class="custom-example-viewer"></div>
+                        </div>
+                        <pre class="code-example-code">
+<code class="language-javascript">
+import { ImageViewer } from 'jeriview';
+import * as ReactDOM from 'react-dom';
+
+function configForImage(imageName) {
+    return {
+    title: 'root',
+    children: [
+        { title: 'Image', image: `/img/${imageName}.exr` },
+        { title: 'Reference', image: `/img/${imageName}-ref.exr` },
+    ]
+    };
+}
+
+const MyApp = ({ imageName }) => (
+    &lt;div&gt;
+        &lt;p&gt;Inspecting {imageName}&lt;/p&gt;
+        &lt;div style={{position: 'relative', height: '300px'}}&gt;
+            &lt;ImageViewer data={configForImage(imageName)} /&gt;
+        &lt;/div&gt;
+    &lt;/div&gt;
+);
+
+ReactDOM.render(
+    &lt;MyApp imageName="living-room" /&gt;,
+    document.getElementById('root')
+);</code></pre>
+                    </div>
+                </div>
+
+                <div class="row code-example code-example-js">
+                    <div class="col-4">
+                        <h2>No Funky UI, Please</h2>
+                        <p>
+                            By default, JERI comes with multi-image viewing, keyboard shortcuts, etc. If you just need to show a simple EXR image, you can choose to just use JERI's EXR parsing and basic display.
+                        </p>
+                    </div>
+                    <div class="col-8">
+                        <ul class="list-inline code-example-nav">
+                            <li class="list-inline-item">
+                                <button class="btn code-example-link code-example-link-code">Code</button>
+                            </li>
+                            <li class="list-inline-item">
+                                <button class="btn code-example-link code-example-link-result">Result</button>
+                            </li>
+                        </ul>
+
+                        <div class="code-example-viewer" style="height: 0; padding-bottom: 62.1%; position: relative">
+                            <div class="custom-example-viewer">
+                              <canvas id="image-layer" class="stretch"></canvas>
+                              <div id="mouse-layer" class="stretch"></div>
+                            </div>
+                        </div>
+                        <pre class="code-example-code">
+<code class="language-javascript">
+// See Github: build_web/examples/example_basic.html
+const cache = new JeriView.ImageCache();
+const imgUrl = "./img/living-room.exr";
+
+cache.get(imgUrl)
+  .then((image) => {
+    // ImageLayer displays an image
+    const imageLayer = new JeriView.ImageLayer(document.getElementById('image-layer'), image);
+    // MouseLayer detects and reports mouse and zoom events
+    const mouseLayer = new JeriView.MouseLayer(document.getElementById('mouse-layer'), image);
+    mouseLayer.setEnableMouseEvents(true);
+    // They can be connected as follows:
+    mouseLayer.onTransformationChange(function (transformation) {
+      imageLayer.setTransformation(transformation);
+    });
+  })
+  .catch((error) => console.error(error));</code></pre>
+                    </div>
+                </div>
+
+
+                <div class="row code-example">
+                    <div class="col">
+                        <h2>Asynchronous EXR Parsing</h2>
+                        <p>JERI contains a version of OpenEXR that was compiled to JavaScript using emscripten. The parsing is done asynchronously in webworker process to prevent blocking the UI.</p>
+                    </div>
+                    <div class="col">
+                        <h2>Keyboard Shortcuts</h2>
+                        <p>Everything in JERI can be controlled using a keyboard. To find out about all the shortcuts, select a viewer and press <code>[?]</code></p>
+                    </div>
+                    <div class="col">
+                        <h2>Pan, zoom, change exposure</h2>
+                        <p>You can inspect high dynamic range images in JERI by changing exposure settings, panning the image around and zooming in to see all the details.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="learn-by-example-container">
+            <a class="btn btn-lg" href="https://github.com/disneyresearch/jeri/build_web/examples">Learn by Example</a>
+        </div>
+        <nav class="navbar navbar-expand-lg navbar-dark navbar-footer">
+            <div class="container">
+                <a class="navbar-brand mr-auto" href="#">
+                    <img src="./img/logos/Jeri_Logo_Text_white.png" style="height: 2em" alt="JERI">
+                </a>
+                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#footerSupportedContent" aria-controls="navbarSupportedContent"
+                    aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <div class="collapse navbar-collapse" id="footerSupportedContent">
+                    <ul class="navbar-nav ml-auto">
+                        <li class="nav-item">
+                            <a class="nav-link" href="https://www.disneyresearch.com/">Disney Research</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="https://github.com/disneyresearch/jeri/LICENSE">License</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react/15.6.1/react.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/react/15.6.1/react-dom.js"></script>
+    <script src="vendor/jeri/jeriview.min.js"></script>
+    <script src="vendor/prism/prism.js"></script>
+    <script src="jeri-website.js"></script>
+    <script>
+        function configForImage(imageName) {
+          return {
+              title: 'root',
+              children: [{ title: 'Image', image: '/img/' + imageName + '.exr' }, { title: 'Reference', image: '/img/' + imageName + '-ref.exr' }]
+          };
+      }
+
+      var MyApp = function MyApp(_ref) {
+          var imageName = _ref.imageName;
+          return React.createElement(
+              'div',
+              null,
+              React.createElement(
+                  'p',
+                  null,
+                  'Inspecting ',
+                  imageName
+              ),
+              React.createElement(
+                  'div',
+                  { style: { position: 'relative', height: '300px' } },
+                  React.createElement(JeriView.ImageViewer, { data: configForImage(imageName) })
+              )
+          );
+      };
+
+      ReactDOM.render(React.createElement(MyApp, { imageName: 'living-room' }), document.getElementById('jeri-view-react-example'));
+
+
+
+
+
+
+
+      // See Github: build_web/examples/example_basic.html
+      const cache = new JeriView.ImageCache();
+      const imgUrl = "./img/living-room.exr";
+
+      cache.get(imgUrl)
+        .then((image) => {
+          // ImageLayer displays an image
+          const imageLayer = new JeriView.ImageLayer(document.getElementById('image-layer'), image);
+          // MouseLayer detects and reports mouse and zoom events
+          const mouseLayer = new JeriView.MouseLayer(document.getElementById('mouse-layer'), image);
+          mouseLayer.setEnableMouseEvents(true);
+          // They can be connected as follows:
+          mouseLayer.onTransformationChange(function (transformation) {
+            imageLayer.setTransformation(transformation);
+          });
+        })
+        .catch((error) => console.error(error));
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,216 @@
+html {
+  font-size: 14px;
+}
+
+.App {
+  /* min-height: 100vh; */
+  display: flex;
+  flex-direction: column;
+}
+
+h1, h2, h3, h4, h5, p, div, a {
+  font-family: Montserrat, sans-serif;
+}
+
+.hero {
+  background-color: #1B3F56;
+  color: white;
+  padding: 4rem 0;
+}
+
+.hero-title {
+  font-weight: bold;
+  text-align: center;
+  color: #7DC6C6;
+  font-size: 6rem;
+  line-height: 1.2em;
+  margin: 0;
+  padding: 0;
+  margin-bottom: .5rem;
+}
+
+.hero-subtitle {
+  text-align: center;
+  font-size: 2.25rem;
+  line-height: 1.2em;
+  margin: 0;
+  padding: 0;
+  margin-bottom: .0rem;
+}
+
+.hero-subsubtitle {
+  font-family: Dancing Script, sans-serif;
+  text-align: center;
+  font-size: 2.25rem;
+  line-height: 0.8em;
+  margin: 0;
+  padding: 0;
+  margin-bottom: 1.0rem;
+}
+
+.hero-buttons {
+  margin-top: 1.4em;
+  margin-bottom: 1em;
+  font-size: 1.5rem;
+}
+
+.hero-button {
+  text-align: center;
+  display: block;
+  padding: .2em;
+  transition: transform .1s ease-in;
+}
+
+.hero-button-primary {
+  background-color: #7DC6C6;
+  border: 2px solid #7DC6C6;
+  color: white;
+}
+
+.hero-button-primary:hover {
+  color: white;
+  text-decoration: none;
+  transform: scale(1.1);
+}
+
+.hero-button-secondary {
+  border: 2px solid #7DC6C6;
+  color: #7DC6C6 !important;
+}
+
+.hero-button-secondary:hover {
+  color: #7DC6C6 !important;
+  text-decoration: none;
+  transform: scale(1.1);
+}
+
+.demo-area {
+  height: 40em;
+  position: relative;
+}
+
+.demo-area-container {
+  background-color: #1b3f56;
+  padding: 1rem;
+  position: relative;
+  padding-top: 0;
+  padding-bottom: 5rem;
+}
+
+.demo-area-black-bar {
+  /*! background-color: #333333; */
+  height: 3.11rem;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+}
+
+.intro-text-container {
+  margin: 6rem 0;
+  text-align: center;
+  color: #919191;
+  font-size: 1.2rem;
+  line-height: 1.375em;
+}
+
+.intro-text-container h2 {
+  font-size: 1.8rem;
+  color: #708999;
+  line-height: 1.2em;
+  margin-bottom: .8rem;
+}
+
+.examples-container {
+  background-color: #F8F8F8;
+  padding-top: 6rem;
+  font-size: 1.2rem;
+  line-height: 1.375em;
+  color: #919191;
+}
+
+.examples-container h2 {
+  color: #1E4263;
+  padding: 0;
+  margin: 0;
+  font-size: 1em;
+  margin-bottom: 0.5em;
+}
+
+.code-example {
+  padding-bottom: 6rem;
+}
+.code-example pre {
+  font-size: 1rem;
+}
+
+.learn-by-example-container {
+  text-align: center;
+  padding: 4rem 0;
+}
+
+.learn-by-example-container .btn {
+  background-color: #7DC6C6;
+  color: white;
+}
+
+.navbar-footer {
+  background-color: #1B3F56;
+}
+
+.code-example-nav {
+  margin: 0;
+  text-align: right;
+  margin-top: -2.5em;
+}
+
+.code-example-link {
+  color: rgba(92, 92, 97, 0.5);
+  background-color: transparent;
+}
+
+.code-example-link.active {
+  color: rgb(92, 92, 97);
+}
+
+.doc-container {
+  flex-grow: 1;
+  background-color: rgb(248, 249, 250);
+  padding: 3rem;
+}
+
+.doc-container h2 {
+  color: #1E4263;
+  padding: 0;
+  margin-top: 2em;
+  font-size: 2rem;
+  font-weight: 500;
+  margin-bottom: 0.5em;
+}
+
+.doc-container h3 {
+  color: #1E4263;
+  padding: 0;
+  margin-top: 2.5em;
+  font-size: 1.5rem;
+  font-weight: 500;
+  margin-bottom: 0.5em;
+}
+.doc-container h2:first-child, .doc-container h3:first-child {
+  margin-top: 0;
+}
+
+.stretch {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  left:0; right: 0; top:0; bottom: 0;
+}
+
+.custom-example-viewer {
+  height: 450px;
+  width: 100%;
+  border: 1px solid #ccc;
+  padding: .5em;
+  position: relative;
+}
