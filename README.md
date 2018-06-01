@@ -1,13 +1,13 @@
 # JERI Viewer
 
-The JavaScript Extended-Range Image Viewer was designed to be easy to use off the shelf as an interactive component in any website or web-based document. It contains a version of OpenEXR that was compiled with [emscripten](http://kripken.github.io/emscripten-site/index.html) to work in a web browser. Around this core, JERI offers multi-level tabs that allow easy navigation through large sets of images and the viewer supports zooming, panning, changing exposure, and quickly toggling between images. These features are built in [React](https://reactjs.org/), but knowledge of this framework is not required to use the viewer.
+The JavaScript Extended-Range Image (JERI) Viewer was designed to be an easy-to-use, interactive component that can be embedded in websites and web-based documents. It contains a version of OpenEXR that was transpiled with [emscripten](http://kripken.github.io/emscripten-site/index.html) from C++ to JavaScript to enable running it in a web browser. Around this core, JERI offers multi-level tabs that allow easy navigation through large sets of images and supports zooming, panning, changing exposure, and quickly toggling between images. These features are built using [React](https://reactjs.org/), but knowledge of this framework is not required to use the viewer.
 
 ## Getting started--quick and dirty and Webpack-free
 
-1. Build the network (see later), or [get the latest build](#).
+1. Build the network (see Contributing section), or [get the latest build](#).
 2. Copy `jeriview.js`, `exr-warp.js`, `exr-warp.js.mem` and `exr.worker.js` to your project.
-3. Include `<script src="/jeriview.js"></script>` on your webpage.
-4. See the [Examples](build_web/examples/) for use instructions. You view the examples in a browser by running a web-server in the `build_web` directory and then opening http://localhost:3000/examples in a browser.
+3. Add `<script src="/jeriview.js"></script>` to your webpage.
+4. See the [Examples](build_web/examples/) for use instructions. The examples can be opened in a browser by running a web-server in the `build_web` directory and then opening http://localhost:3000/examples in a browser.
 
 To run a webserver for viewing the examples, use one of the following:
 ```bash
@@ -18,7 +18,7 @@ npm install -g serve && serve -s . # JavaScript
 
 ## Getting started with Webpack
 
-For users experienced with web development that build their projects with [webpack](https://webpack.js.org/) or even use React for their project, it is recommended to directly use the React components defined in `src/` and outlined in the [API Documentation](documentation/index.html).
+For users experienced with web development that build their projects with [webpack](https://webpack.js.org/) and/or use React for their project, it is recommended to directly use the React components defined in `src/` and outlined in the [API Documentation](documentation/index.html).
 
 To use JERI Viewer in a web application that is built with webpack, run
 
@@ -56,6 +56,14 @@ render(<ImageViewer data={data} baseUrl='' />, document.getElementById('my-conta
 ## Contributing
 
 1. Clone this repository
-2. Run `npm install` inside the repository direction.
+2. Run `npm install` inside the repository directory.
 3. Run `npm run docs` to generate the API documentation.
 4. Build with `npm run build`.
+
+
+## Credits
+
+JERI was developed at Disney Research by the following people:
+- Jan Novák (initial code)
+- Thijs Vogels (React, Webpack, further improvements)
+- Gerhard Röthlin (emscripten, code review)
