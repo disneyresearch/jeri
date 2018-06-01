@@ -68,7 +68,7 @@
                     <div class="jeri-view" data-data='{
                         "title": "root",
                         "children": [
-                            { "title": "Rendering", "image": "./img/living-room-input.exr" },
+                            { "title": "Rendering", "image": "./img/`-input.exr" },
                             { "title": "Denoised", "image": "./img/living-room.exr" },
                             { "title": "Reference", "image": "./img/living-room-ref.exr" },
                             { "title": "SSIM", "lossMap": {
@@ -144,19 +144,19 @@
                                     ]
                                 },
                                 {
-                                    "title": "Bed room",
+                                    "title": "Water glass",
                                     "children": [
                                         {
                                         "title": "Input image",
-                                        "image": "./img/living-room-input.exr"
+                                        "image": "./img/glass-input.exr"
                                         },
                                         {
                                         "title": "Improved",
-                                        "image": "./img/living-room.exr"
+                                        "image": "./img/glass.exr"
                                         },
                                         {
                                         "title": "Reference",
-                                        "image": "./img/living-room-ref.exr"
+                                        "image": "./img/glass-ref.exr"
                                         }
                                     ]
                                 }
@@ -174,16 +174,16 @@ const config = {
         { title: 'Input image', image: 'living-room-input.exr' },
         { title: 'Improved', image: 'living-room-denoised.exr' },
         { title: 'Reference', image: 'living-room-ref.exr' }
-      ]        
+      ]
     },
     {
-      title: 'Car',
+      title: 'Water glass',
       children: [
-        { title: 'Input image', image: 'living-room-input.exr' },
-        { title: 'Improved', image: 'living-room-denoised.exr' },
-        { title: 'Reference', image: 'living-room-ref.exr' }
-      ]        
-    }    
+        { title: 'Input image', image: 'glass-input.exr' },
+        { title: 'Improved', image: 'glass-denoised.exr' },
+        { title: 'Reference', image: 'glass-ref.exr' }
+      ]
+    }
   ]
 };
 JeriView.renderViewer(document.getElementById('root'), config);</code></pre>
