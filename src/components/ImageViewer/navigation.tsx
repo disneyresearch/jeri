@@ -20,7 +20,7 @@ const NavLink = styled.a`
   white-space: nowrap;
   position: relative;
   background-color: ${(props: any) => props.active ? '#7DC6C6' : 'inherit'};
-  color: ${(props: any) => props.active ? '#FFFFFF' : '#AAA'};
+  color: ${(props: any) => props.active ? '#FFFFFF !important' : '#AAA !important'};
   &:active {
     background-color: ${(props: any) => props.active ? '#6DB6B6' : '#222'};
   }
