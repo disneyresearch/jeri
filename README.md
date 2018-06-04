@@ -61,9 +61,11 @@ render(<ImageViewer data={data} baseUrl='' />, document.getElementById('my-conta
 4. Build with `npm run build`.
 
 
-## Credits
+## Contributors
 
-JERI was developed at Disney Research by the following people:
-- Jan Novák (initial code)
-- Thijs Vogels (React, Webpack, further improvements)
-- Gerhard Röthlin (emscripten, code review)
+JERI features contributions by the following people:
+
+- Jan Novák (Disney Research): Initial code, WebGL
+- Thijs Vogels (Disney Research): Asynchronous EXR loading, React & webpack, UI and API improvements
+- Gerhard Röthlin (Disney Research): Emscripten, code review
+- Alessia Marra (Disney Research): Logo, graphic design
