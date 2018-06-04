@@ -68,14 +68,14 @@
                     <div class="jeri-view" data-data='{
                         "title": "root",
                         "children": [
-                            { "title": "Rendering", "image": "./img/`-input.exr" },
-                            { "title": "Denoised", "image": "./img/living-room.exr" },
-                            { "title": "Reference", "image": "./img/living-room-ref.exr" },
+                            { "title": "Rendering", "image": "./img/glass-input.exr" },
+                            { "title": "Denoised", "image": "./img/glass.exr" },
+                            { "title": "Reference", "image": "./img/glass-ref.exr" },
                             { "title": "SSIM", "lossMap": {
                                 "function": "SSIM",
                                 "tonemapGroup": "SSIM",
-                                "imageA": "./img/living-room-ref.exr",
-                                "imageB": "./img/living-room.exr"
+                                "imageA": "./img/glass-ref.exr",
+                                "imageB": "./img/glass.exr"
                             } }
                         ]
                     }'>
@@ -127,6 +127,23 @@
                             "title": "root",
                             "children": [
                                 {
+                                    "title": "Glass of water",
+                                    "children": [
+                                        {
+                                        "title": "Input image",
+                                        "image": "./img/glass-input.exr"
+                                        },
+                                        {
+                                        "title": "Improved",
+                                        "image": "./img/glass.exr"
+                                        },
+                                        {
+                                        "title": "Reference",
+                                        "image": "./img/glass-ref.exr"
+                                        }
+                                    ]
+                                },
+                                {
                                     "title": "Living room",
                                     "children": [
                                         {
@@ -142,23 +159,6 @@
                                         "image": "./img/living-room-ref.exr"
                                         }
                                     ]
-                                },
-                                {
-                                    "title": "Water glass",
-                                    "children": [
-                                        {
-                                        "title": "Input image",
-                                        "image": "./img/glass-input.exr"
-                                        },
-                                        {
-                                        "title": "Improved",
-                                        "image": "./img/glass.exr"
-                                        },
-                                        {
-                                        "title": "Reference",
-                                        "image": "./img/glass-ref.exr"
-                                        }
-                                    ]
                                 }
                             ]
                             }'></div>
@@ -169,19 +169,19 @@ const config = {
   title: 'root',
   children: [
     {
+      title: 'Glass of water',
+      children: [
+        { title: 'Input image', image: 'glass-input.exr' },
+        { title: 'Improved', image: 'glass-denoised.exr' },
+        { title: 'Reference', image: 'glass-ref.exr' }
+      ]
+    },
+    {
       title: 'Living room',
       children: [
         { title: 'Input image', image: 'living-room-input.exr' },
         { title: 'Improved', image: 'living-room-denoised.exr' },
         { title: 'Reference', image: 'living-room-ref.exr' }
-      ]
-    },
-    {
-      title: 'Water glass',
-      children: [
-        { title: 'Input image', image: 'glass-input.exr' },
-        { title: 'Improved', image: 'glass-denoised.exr' },
-        { title: 'Reference', image: 'glass-ref.exr' }
       ]
     }
   ]
@@ -211,14 +211,14 @@ JeriView.renderViewer(document.getElementById('root'), config);</code></pre>
                             <div class="jeri-view" data-data='{
                                 "title": "root",
                                 "children": [
-                                    { "title": "Improved", "image": "./img/living-room.exr" },
-                                    { "title": "Reference", "image": "./img/living-room-ref.exr" },
+                                    { "title": "Improved", "image": "./img/glass.exr" },
+                                    { "title": "Reference", "image": "./img/glass-ref.exr" },
                                     {
                                     "title": "SSIM",
                                     "lossMap": {
                                         "function": "SSIM",
-                                        "imageA": "./img/living-room.exr",
-                                        "imageB": "./img/living-room-ref.exr"
+                                        "imageA": "./img/glass.exr",
+                                        "imageB": "./img/glass-ref.exr"
                                     }
                                     }
                                 ]
@@ -229,14 +229,14 @@ JeriView.renderViewer(document.getElementById('root'), config);</code></pre>
 const config = {
   title: 'root',
   children: [
-    { title: 'Improved', image: 'living-room.exr' },
-    { title: 'Reference', image: 'living-room-ref.exr' },
+    { title: 'Improved', image: 'glass.exr' },
+    { title: 'Reference', image: 'glass-ref.exr' },
     {
       title: 'SSIM',
       lossMap: {
         'function': 'SSIM',
-        imageA: 'living-room.exr',
-        imageB: 'living-room-ref.exr'
+        imageA: 'glass.exr',
+        imageB: 'glass-ref.exr'
       }
     },
   ]
@@ -290,7 +290,7 @@ const MyApp = ({ imageName }) => (
 );
 
 ReactDOM.render(
-    &lt;MyApp imageName="living-room" /&gt;,
+    &lt;MyApp imageName="glass" /&gt;,
     document.getElementById('root')
 );</code></pre>
                     </div>
@@ -323,7 +323,7 @@ ReactDOM.render(
 <code class="language-javascript">
 // See Github: build_web/examples/example_basic.html
 const cache = new JeriView.ImageCache();
-const imgUrl = "./img/living-room.exr";
+const imgUrl = "./img/glass.exr";
 
 cache.get(imgUrl)
   .then((image) => {
@@ -416,7 +416,7 @@ cache.get(imgUrl)
           );
       };
 
-      ReactDOM.render(React.createElement(MyApp, { imageName: 'living-room' }), document.getElementById('jeri-view-react-example'));
+      ReactDOM.render(React.createElement(MyApp, { imageName: 'glass' }), document.getElementById('jeri-view-react-example'));
 
 
 
@@ -426,7 +426,7 @@ cache.get(imgUrl)
 
       // See Github: build_web/examples/example_basic.html
       const cache = new JeriView.ImageCache();
-      const imgUrl = "./img/living-room.exr";
+      const imgUrl = "./img/glass.exr";
 
       cache.get(imgUrl)
         .then((image) => {
