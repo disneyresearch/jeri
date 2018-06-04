@@ -89,6 +89,13 @@ h1, h2, h3, h4, h5, p, div, a {
   position: relative;
 }
 
+.demo-area-help {
+  text-align: right;
+  font-size: .9em;
+  color: rgba(255,255,255,0.5);
+  margin-top: .6em;
+}
+
 .demo-area-container {
   background-color: #1b3f56;
   padding: 1rem;
@@ -213,4 +220,8 @@ h1, h2, h3, h4, h5, p, div, a {
   border: 1px solid #ccc;
   padding: .5em;
   position: relative;
+}
+
+.jeri-view {
+  font-size: 1rem;
 }
