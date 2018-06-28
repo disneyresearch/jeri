@@ -2,11 +2,11 @@
 
 The JavaScript Extended-Range Image (JERI) Viewer was designed to be an easy-to-use, interactive component that can be embedded in websites and web-based documents. It contains a version of OpenEXR that was transpiled with [emscripten](http://kripken.github.io/emscripten-site/index.html) from C++ to JavaScript to enable running it in a web browser. Around this core, JERI offers multi-level tabs that allow easy navigation through large sets of images and supports zooming, panning, changing exposure, and quickly toggling between images. These features are built using [React](https://reactjs.org/), but knowledge of this framework is not required to use the viewer.
 
-## Getting started--quick and dirty and Webpack-free
+## Getting started--quick and dirty and without Webpack
 
 1. Build the network (see Contributing section), or [get the latest build](#).
-2. Copy `jeriview.js`, `exr-warp.js`, `exr-warp.js.mem` and `exr.worker.js` to your project.
-3. Add `<script src="/jeriview.js"></script>` to your webpage.
+2. Copy `jeri.js`, `exr-warp.js`, `exr-warp.js.mem` and `exr.worker.js` to your project.
+3. Add `<script src="/jeri.js"></script>` to your webpage.
 4. See the [Examples](build_web/examples/) for use instructions. The examples can be opened in a browser by running a web-server in the `build_web` directory and then opening http://localhost:3000/examples in a browser.
 
 To run a webserver for viewing the examples, use one of the following:
@@ -25,13 +25,13 @@ To use JERI Viewer in a web application that is built with webpack, run
 ```bash
 npm install --save react
 npm install --save react-dom
-npm install --save jeriview
+npm install --save jeri
 ```
 
 You can then
 
 ```jsx
-import {ImageViewer} from 'jeriview';
+import {ImageViewer} from 'jeri';
 import {render} from 'react-dom';
 const data = {
     title: 'root',

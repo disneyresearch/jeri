@@ -3,14 +3,14 @@ const webpack = require('webpack');
 
 const config = {
   entry: {
-    'jeriview': './build_npm/jeriview.js',
-    'jeriview.min': './build_npm/jeriview.js'
+    'jeri': './build_npm/jeri.js',
+    'jeri.min': './build_npm/jeri.js'
   },
   output: {
     path: path.resolve(__dirname, 'build_web'),
     filename: '[name].js',
     libraryTarget: 'umd',
-    library: 'JeriView',
+    library: 'Jeri',
     umdNamedDefine: true,
     publicPath: '/',
   },

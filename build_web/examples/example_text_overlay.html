@@ -21,13 +21,13 @@
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/react/15.6.1/react.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/react/15.6.1/react-dom.js"></script>
-  <script src="../jeriview.js"></script>
+  <script src="../jeri.js"></script>
   <script>
-    const ImageLayer = JeriView.ImageLayer;
-    const MouseLayer = JeriView.MouseLayer;
-    const TextLayer = JeriView.TextLayer;
+    const ImageLayer = Jeri.ImageLayer;
+    const MouseLayer = Jeri.MouseLayer;
+    const TextLayer = Jeri.TextLayer;
 
-    const cache = new JeriView.ImageCache();
+    const cache = new Jeri.ImageCache();
     const imgUrl = "images/test_image.exr";
 
     cache.get(imgUrl)

@@ -34,12 +34,12 @@
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/react/15.6.1/react.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/react/15.6.1/react-dom.js"></script>
-  <script src="../jeriview.js"></script>
+  <script src="../jeri.js"></script>
   <script>
-    const ImageLayer = JeriView.ImageLayer;
-    const MouseLayer = JeriView.MouseLayer;
+    const ImageLayer = Jeri.ImageLayer;
+    const MouseLayer = Jeri.MouseLayer;
 
-    const cache = new JeriView.ImageCache();
+    const cache = new Jeri.ImageCache();
     const imgUrl = "images/test_image.exr";
 
     cache.get(imgUrl)
@@ -60,7 +60,7 @@
             0      , 0,         1,  0,
             -x*scale, -y*scale, 0,  1,
           ];
-          inset.setTransformation(new JeriView.Matrix4x4(trans));
+          inset.setTransformation(new Jeri.Matrix4x4(trans));
         }
         mouseLayer.onPointAt(handlePointing);
       })
