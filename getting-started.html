@@ -51,45 +51,33 @@
                 <div class="row">
                     <div class="col-xl-8">
                         <h3>Getting started</h3>
-                        <p>The easiest way to get started with the JERI viewer is to download the
-                            <a href="release/jeriview-0.3.6.zip">latest release</a>. It contains all required scripts and a directory with examples of usage.</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="learn-by-example-container">
-        <a class="btn btn-lg" href="release/jeriview-0.3.6.zip">Download JERI 0.3.6</a>
-    </div>
-
-    <div class="doc-container">
-        <div class="container">
-            <div class="row">
-                <div class="col-xl-8">
+                        <p>The easiest way to get started with the JERI viewer is to download the source code as well as the binary package of the
+                            <a href="https://github.com/disneyresearch/jeri/releases/">latest release</a>.</p>
                     <h3>Viewing examples</h3>
-                    <p>To view the examples, run a local web server in the release directory.</p>
+                    <p>To view the examples, you first need to build the source using <code>npm build</code>. Alternatively you can simply copy all precompiled scripts from the <code>build_web</code> directory in the binary package to the same directory in the source code package.
+                    </p>
+                    <p>Because of the cross-origin resource sharing policy in browsers, JERI only works when hosted using a web server. A page containing JERI does <strong>not</strong> work properly when opened using the <code>file://</code> protocol.
+                    </p>
+                    <p>
+                    To start a local web server, run one of the following commands from the <code>build_web</code> directory in the source code.
+                    </p>
                     <pre><code class="language-bash">
 python -m SimpleHTTPServer 8000; # Python 2
 python3 -m http.server 8000; # Python 3
 npm install -g serve && serve -s . -p 8000 # JavaScript
 </code></pre>
-                    <p>This serves the examples at
-                        <a href="http://localhost:8000/examples">http://localhost:8000/examples</a>.</p>
-
-                    <p>Because of the cross-origin resource sharing policy in browsers, JERI only works when hosted using a
-                        web server. A page containing JERI does
-                        <strong>not</strong> work properly when opened using the
-                        <code>file://</code> protocol.</p>
+                    <p>You can then view the examples at
+                        <a href="http://localhost:8000/examples">http://localhost:8000/examples</a>.
+                    </p>
 
                     <h3>Embedding JERI</h3>
                     <p>Load the
-                        <code>JeriView</code> library and its dependency
+                        <code>jeri</code> library and its dependency
                         <a href="https://reactjs.org/">React</a>:</p>
                     <pre><code class="language-html">
 &lt;script src="https://cdnjs.cloudflare.com/ajax/libs/react/15.6.1/react.js"&gt;&lt;/script&gt;
 &lt;script src="https://cdnjs.cloudflare.com/ajax/libs/react/15.6.1/react-dom.js"&gt;&lt;/script&gt;
-&lt;script src="jeriview.js"&gt;&lt;/script&gt;
+&lt;script src="jeri.js"&gt;&lt;/script&gt;
 </code></pre>
 
                     <p>Next, describe the hierarchical menu structure of the viewer, like this:</p>
@@ -155,14 +143,14 @@ const data = {
   const data = ...;
   // Call renderViewer as often as you want, any time the data changes
   // Updates are cheap, efficient, and state is preserved
-  JeriView.renderViewer(document.getElementById('my-viewer'), data);
+  Jeri.renderViewer(document.getElementById('my-viewer'), data);
 &lt;/script&gt;
 </code></pre>
 
                     <h3>Webworker scripts</h3>
                     <p>JERI parses EXR files using a version of OpenEXR compiled with
                         <a href="http://kripken.github.io/emscripten-site/index.html">emscripten</a>. The parsing happens asynchronously using webworkers. For this reason,
-                        <code>jeriview.js</code> will look for three files:</p>
+                        <code>jeri.js</code> will look for three files:</p>
                     <pre><code class="language-bash">
 exr.worker.js # the webworker
 exr-wrap.js # a compiled OpenEXR library
@@ -173,7 +161,7 @@ exr-wrap.js.mem # an emscripten memory file for the compiled OpenEXR library
                         served from another path, you need to change base url in two scripts:
                     </p>
                     <pre><code class="language-js">
-// jeriview.js
+// jeri.js
 __webpack_require__.p = "/";
 // exr.worker.js
 __webpack_require__.p = "/";
@@ -214,7 +202,7 @@ __webpack_require__.p = "/";
     </div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/react/15.6.1/react.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/react/15.6.1/react-dom.js"></script>
-    <script src="vendor/jeri/jeriview.min.js"></script>
+    <script src="vendor/jeri/jeri.min.js"></script>
     <script src="vendor/prism/prism.js"></script>
     <script src="jeri-website.js"></script>
 </body>

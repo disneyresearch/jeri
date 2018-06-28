@@ -1,7 +1,7 @@
 // Acivate JERI for all DOM elements with a class 'jeri-view'
 for (let elem of document.getElementsByClassName('jeri-view')) {
     const data = JSON.parse(elem.dataset.data);
-    JeriView.renderViewer(elem, data);
+    Jeri.renderViewer(elem, data);
 }
 
 // Enable toggling in code examples

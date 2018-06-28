@@ -189,7 +189,7 @@ const config = {
     }
   ]
 };
-JeriView.renderViewer(document.getElementById('root'), config);</code></pre>
+Jeri.renderViewer(document.getElementById('root'), config);</code></pre>
                     </div>
                 </div>
 
@@ -244,7 +244,7 @@ const config = {
     },
   ]
 };
-JeriView.renderViewer(document.getElementById('root'), config);</code></pre>
+Jeri.renderViewer(document.getElementById('root'), config);</code></pre>
                     </div>
                 </div>
 
@@ -270,7 +270,7 @@ JeriView.renderViewer(document.getElementById('root'), config);</code></pre>
                         </div>
                         <pre class="code-example-code">
 <code class="language-javascript">
-import { ImageViewer } from 'jeriview';
+import { ImageViewer } from 'jeri';
 import * as ReactDOM from 'react-dom';
 
 function configForImage(imageName) {
@@ -325,15 +325,15 @@ ReactDOM.render(
                         <pre class="code-example-code">
 <code class="language-javascript">
 // See Github: build_web/examples/example_basic.html
-const cache = new JeriView.ImageCache();
+const cache = new Jeri.ImageCache();
 const imgUrl = "./img/glass.exr";
 
 cache.get(imgUrl)
   .then((image) => {
     // ImageLayer displays an image
-    const imageLayer = new JeriView.ImageLayer(document.getElementById('image-layer'), image);
+    const imageLayer = new Jeri.ImageLayer(document.getElementById('image-layer'), image);
     // MouseLayer detects and reports mouse and zoom events
-    const mouseLayer = new JeriView.MouseLayer(document.getElementById('mouse-layer'), image);
+    const mouseLayer = new Jeri.MouseLayer(document.getElementById('mouse-layer'), image);
     mouseLayer.setEnableMouseEvents(true);
     // They can be connected as follows:
     mouseLayer.onTransformationChange(function (transformation) {
@@ -389,7 +389,7 @@ cache.get(imgUrl)
     </div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/react/15.6.1/react.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/react/15.6.1/react-dom.js"></script>
-    <script src="vendor/jeri/jeriview.min.js"></script>
+    <script src="vendor/jeri/jeri.min.js"></script>
     <script src="vendor/prism/prism.js"></script>
     <script src="jeri-website.js"></script>
     <script>
@@ -414,7 +414,7 @@ cache.get(imgUrl)
               React.createElement(
                   'div',
                   { style: { position: 'relative', height: '300px' } },
-                  React.createElement(JeriView.ImageViewer, { data: configForImage(imageName) })
+                  React.createElement(Jeri.ImageViewer, { data: configForImage(imageName) })
               )
           );
       };
@@ -428,15 +428,15 @@ cache.get(imgUrl)
 
 
       // See Github: build_web/examples/example_basic.html
-      const cache = new JeriView.ImageCache();
+      const cache = new Jeri.ImageCache();
       const imgUrl = "./img/glass.exr";
 
       cache.get(imgUrl)
         .then((image) => {
           // ImageLayer displays an image
-          const imageLayer = new JeriView.ImageLayer(document.getElementById('image-layer'), image);
+          const imageLayer = new Jeri.ImageLayer(document.getElementById('image-layer'), image);
           // MouseLayer detects and reports mouse and zoom events
-          const mouseLayer = new JeriView.MouseLayer(document.getElementById('mouse-layer'), image);
+          const mouseLayer = new Jeri.MouseLayer(document.getElementById('mouse-layer'), image);
           mouseLayer.setEnableMouseEvents(true);
           // They can be connected as follows:
           mouseLayer.onTransformationChange(function (transformation) {
