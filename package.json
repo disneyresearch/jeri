@@ -1,8 +1,10 @@
 {
   "name": "jeri",
-  "version": "0.3.6",
-  "license": "SEE LICENSE IN FILE LICENSE",
-  "private": true,
+  "version": "1.0.0",
+  "license": "Modified Apache 2.0 License (see the license file)",
+  "homepage": "https://jeri.io",
+  "keywords": ["EXR", "OpenEXR", "HDR", "image", "viewer"],
+  "description": "JavaScript Extended-Range Image viewer",
   "dependencies": {
     "@types/react": "15.6.1",
     "@types/react-dom": "15.5.6",
