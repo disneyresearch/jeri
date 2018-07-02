@@ -1,6 +1,8 @@
 # JERI Viewer
 
-The JavaScript Extended-Range Image (JERI) Viewer was designed to be an easy-to-use, interactive component that can be embedded in websites and web-based documents. It contains a version of OpenEXR that was transpiled with [emscripten](http://kripken.github.io/emscripten-site/index.html) from C++ to JavaScript to enable running it in a web browser. Around this core, JERI offers multi-level tabs that allow easy navigation through large sets of images and supports zooming, panning, changing exposure, and quickly toggling between images. These features are built using [React](https://reactjs.org/), but knowledge of this framework is not required to use the viewer.
+The JavaScript Extended-Range Image (JERI) Viewer was designed to be an easy-to-use, interactive component that can be embedded in websites and web-based documents. It contains a version of OpenEXR that was transpiled with [emscripten](http://kripken.github.io/emscripten-site/index.html) from C++ to JavaScript to enable running it in a web browser. Around this core, JERI offers multi-level tabs that allow easy navigation through large sets of images and supports zooming, panning, changing exposure, and quickly toggling between images. These features are built using [React](https://reactjs.org/), but knowledge of this framework is not required to use the viewer. 
+
+See [jeri.io](https://jeri.io/) for a live demonstration.
 
 ## Getting started--quick and dirty and without Webpack
 
