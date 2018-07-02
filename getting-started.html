@@ -54,9 +54,9 @@
                         <p>The easiest way to get started with the JERI viewer is to download the source code as well as the binary package of the
                             <a href="https://github.com/disneyresearch/jeri/releases/">latest release</a>.</p>
                     <h3>Viewing examples</h3>
-                    <p>To view the examples, you first need to build the source using <code>npm build</code>. Alternatively you can simply copy all precompiled scripts from the <code>build_web</code> directory in the binary package to the same directory in the source code package.
+                    <p>To view the examples, you first need to build the source using <code>npm run build</code>. Alternatively you can simply copy all precompiled scripts from the <code>build_web</code> directory in the binary package to the same directory in the source code package.
                     </p>
-                    <p>Because of the cross-origin resource sharing policy in browsers, JERI only works when hosted using a web server. A page containing JERI does <strong>not</strong> work properly when opened using the <code>file://</code> protocol.
+                    <p>Because of the cross-origin resource-sharing policy of modern browsers, JERI can only load EXR images when hosted using a web server. A page containing JERI does <strong>not</strong> work properly when opened using the <code>file://</code> protocol.
                     </p>
                     <p>
                     To start a local web server, run one of the following commands from the <code>build_web</code> directory in the source code.
@@ -67,7 +67,7 @@ python3 -m http.server 8000; # Python 3
 npm install -g serve && serve -s . -p 8000 # JavaScript
 </code></pre>
                     <p>You can then view the examples at
-                        <a href="http://localhost:8000/examples">http://localhost:8000/examples</a>.
+                        <a href="http://localhost:8000/examples">http://localhost:8000/examples</a>. Check the JavaScript console in the viewer for errors.
                     </p>
 
                     <h3>Embedding JERI</h3>
@@ -170,8 +170,8 @@ __webpack_require__.p = "/";
                     <p>To customize JERI to fit your own application or to contribute to its development, follow the
                         <a href="https://github.com/disneyresearch/jeri/blob/master/README.md">README</a> on Github. It contains instructions on building JERI yourself. This requires NPM and is
                         based on Webpack.</p>
-                    <p>If you are using JERI in an React app built with Webpack, the documentation on Github also outlines how
-                        to install JERI through NPM and use it in an app that uses .
+                    <p>If you are using JERI in a React app built with Webpack, the documentation on Github also outlines how
+                        to install JERI through NPM.
                     </p>
                 </div>
             </div>
