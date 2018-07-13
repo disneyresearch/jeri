@@ -23,6 +23,7 @@ const StretchingDiv = styled.div`
 
 export interface ImageFrameProps {
     image: ImageInput;
+    viewTransform: number;
     exposure: number;
     gamma: number;
     offset: number;
@@ -119,10 +120,12 @@ export default class ImageFrame extends React.Component<ImageFrameProps, {}> {
 
   private updateCanvasProps(previousProps: ImageFrameProps | null = null) {
     if (!previousProps ||
+        previousProps.viewTransform !== this.props.viewTransform ||
         previousProps.exposure !== this.props.exposure ||
         previousProps.gamma !== this.props.gamma ||
         previousProps.offset !== this.props.offset) {
       this.imageLayer.setTonemapping({
+        viewTransform: this.props.viewTransform,
         exposure: this.props.exposure,
         offset: this.props.offset,
         gamma: this.props.gamma

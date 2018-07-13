@@ -53,7 +53,7 @@ export default () => {
           </tr>
           <tr>
             <th>Shift + click</th>
-            <td>Open a tab, and activate keyboard shortcuts for the row clicked.</td>
+            <td>Open a tab, and activate keyboard shortcuts for the row clicked</td>
           </tr>
           <tr>
             <th>e / E</th>
@@ -62,6 +62,10 @@ export default () => {
           <tr>
             <th>r</th>
             <td>Reset exposure, positioning and zooming</td>
+          </tr>
+          <tr>
+            <th>t</th>
+            <td>Toggle between the Gamma 2.2 and the Pseudo ARRI K1S1 view transforms</td>
           </tr>
           <tr>
             <th>f</th>
