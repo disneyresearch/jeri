@@ -58,6 +58,10 @@ float luminance(vec3 rgb) {
   return dot(vec3(0.2126, 0.7152, 0.0722), rgb);
 }
 
+vec3 GOG(vec3 rgb, float gain, float offset, float gamma) {
+  return pow(gain * rgb + offset, vec3(1.0 / gamma));
+}
+
 float logEncodingLogC(float a) {
   float LogC = a >= 0.01059106816664 ? 0.385537 + 0.2471896 * log10(a * 5.555556 + 0.052272) : a * 5.367655 + 0.092809;
 
@@ -160,10 +164,10 @@ void main(void) {
 
     if (mode == ${DrawMode.LDR}) {
         col = pow(col, vec3(2.2));
-        col = pow(offset + exposure * col, vec3(1.0 / gamma));
+        col = GOG(col, exposure, offset, gamma);
         col = applyViewTransform(col, viewTransform);
     } else if (mode == ${DrawMode.HDR}) {
-        col = pow(offset + exposure * col, vec3(1.0 / gamma));
+        col = GOG(col, exposure, offset, gamma);
         col = applyViewTransform(col, viewTransform);
     } else {
         float avg = (col.r + col.g + col.b) * 0.3333333333 * exposure;
