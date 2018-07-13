@@ -61,7 +61,7 @@ export default () => {
           </tr>
           <tr>
             <th>r</th>
-            <td>Reset exposure, positioning and zooming</td>
+            <td>Reset exposure, view transform, positioning and zooming</td>
           </tr>
           <tr>
             <th>t</th>
