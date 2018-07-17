@@ -61,6 +61,7 @@ render(<ImageViewer data={data} baseUrl='' />, document.getElementById('my-conta
 2. Run `npm install` inside the repository directory.
 3. Run `npm run docs` to generate the API documentation.
 4. Build with `npm run build`.
+5. Contributors are required to fill out a CLA in order for us to be allowed to accept contributions. See [CLA-Individual](CLA-Individual.md) or [CLA-Corporate](CLA-Corporate.md) for details.
 
 
 ## Contributors
