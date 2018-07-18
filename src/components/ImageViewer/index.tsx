@@ -51,6 +51,7 @@ export interface InputLeafLossMap {
 export interface ImageViewerState {
   activeRow: number;             /** The number of the row that is currently active for keyboard toggling */
   selection: string[];           /** List of item titles that are selected */
+  viewTransform: {[tonemapGroup: string]: number}; /** Image view transform, a number between 0 and 1 for each tonemapGroup (string) */
   exposure: {[tonemapGroup: string]: number}; /** Image exposure, a number > 0 for each tonemapGroup (string) */
   helpIsOpen: boolean;           /** Whether the help screen overlay is currently open */
   defaultTransformation: Matrix4x4;
@@ -104,6 +105,7 @@ export default class ImageViewer extends React.Component<ImageViewerProps, Image
     this.state = {
       activeRow: 0,
       selection: this.getDefaultSelection(this.menuData).slice(1),
+      viewTransform: { default: 0.0 },
       exposure: { default: 1.0 },
       helpIsOpen: false,
       defaultTransformation: Matrix4x4.create(),
@@ -168,8 +170,9 @@ export default class ImageViewer extends React.Component<ImageViewerProps, Image
         </div>
         <ImageArea>
           <ImageFrameWithLoading
+            viewTransform={this.state.viewTransform[imageSpec.tonemapGroup]}
             exposure={this.state.exposure[imageSpec.tonemapGroup] || 1.0}
-            gamma={2.2}
+            gamma={1.0}
             offset={0.0}
             imageSpec={imageSpec}
             ref={(frame) => this.imageFrame = (frame != null) ? frame.imageFrame : null}
@@ -396,6 +399,17 @@ export default class ImageViewer extends React.Component<ImageViewerProps, Image
     actions['['] = moveUpDown(-1);
     actions[']'] = moveUpDown(1);
 
+    // ViewTransform controls
+    const changeViewTransform = () => () => {
+      const tonemapGroup = this.imageSpec().tonemapGroup;
+      const viewTransform = {
+        ...this.state.viewTransform,
+        [tonemapGroup]: (Math.abs(this.state.viewTransform[tonemapGroup] - 1))
+      };
+      this.setState({ viewTransform });
+    };
+    actions.t = changeViewTransform();
+
     // Exposure controls
     const changeExposure = (multiplier: number) => () => {
       const tonemapGroup = this.imageSpec().tonemapGroup;
@@ -410,6 +424,7 @@ export default class ImageViewer extends React.Component<ImageViewerProps, Image
 
     // Reset
     actions.r = () => {
+      this.setState({ viewTransform: { default: 0.0 } });
       this.setState({ exposure: { default: 1.0 } });
       if (this.imageFrame) {
         this.imageFrame.reset();

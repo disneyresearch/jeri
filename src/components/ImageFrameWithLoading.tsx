@@ -43,6 +43,7 @@ export type ImageSpec = ImageSpecUrl | ImageSpecLossMap;
 
 export interface ImageFrameWithLoadingProps {
   imageSpec: ImageSpec;
+  viewTransform: number;
   exposure: number;
   gamma: number;
   offset: number;
@@ -101,6 +102,7 @@ export default class ImageFrameWithLoading extends
       <StretchingDiv>
       {this.state.image != null ?
         <ImageFrame
+          viewTransform={this.props.viewTransform}
           exposure={this.props.exposure}
           gamma={this.props.gamma}
           offset={this.props.offset}

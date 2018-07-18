@@ -9,6 +9,12 @@ enum DrawMode {
   ColorMap = 2,
 }
 
+enum ViewTransform {
+  None = -1,
+  Gamma22 = 0,
+  K1S1 = 1,
+}
+
 const vertexShaderSource = `
 attribute vec3 aVertexPosition;
 attribute vec2 aTextureCoord;
@@ -21,6 +27,7 @@ void main(void) {
 
 const fragmentShaderSource = `
 precision mediump float;
+uniform int viewTransform;
 uniform float exposure;
 uniform float offset;
 uniform float gamma;
@@ -41,13 +48,56 @@ vec3 lookupOffset(sampler2D sampler, vec2 position, vec2 offset) {
     return texture2D(sampler, position + offset / imageSize).rgb;
 }
 
+float log10(float a) {
+  const float logBase10 = 1.0 / log2( 10.0 );
+
+  return log2(a) * logBase10;
+}
+
 float luminance(vec3 rgb) {
   return dot(vec3(0.2126, 0.7152, 0.0722), rgb);
 }
 
-vec3 tonemap(vec3 rgb) {
-  float exponent = 1.0 / 2.2;
+vec3 GOG(vec3 rgb, float gain, float offset, float gamma) {
+  return pow(gain * rgb + offset, vec3(1.0 / gamma));
+}
+
+float logEncodingLogC(float a) {
+  float LogC = a >= 0.01059106816664 ? 0.385537 + 0.2471896 * log10(a * 5.555556 + 0.052272) : a * 5.367655 + 0.092809;
+
+  return LogC;
+}
+
+float sigmoidK1S1(float a) {
+  float sigmoid = 1.0 / (1.0 + pow(2.718281828459045, -8.9 * (a - 0.435)));
+
+  return sigmoid;
+}
+
+vec3 viewTransformNone(vec3 rgb) {
+  return rgb;
+}
+
+vec3 viewTransformGamma22(vec3 rgb) {
+  const float exponent = 1.0 / 2.2;
+
   return pow(max(rgb, 0.0), vec3(exponent, exponent, exponent));
+}
+
+vec3 viewTransformK1S1(vec3 rgb) {
+  vec3 LogC = vec3(logEncodingLogC(rgb.x), logEncodingLogC(rgb.y), logEncodingLogC(rgb.z));
+
+  return vec3(sigmoidK1S1(LogC.x), sigmoidK1S1(LogC.y), sigmoidK1S1(LogC.z));
+}
+
+vec3 applyViewTransform(vec3 rgb, int which) {
+  if (which == ${ViewTransform.None}) {
+    return viewTransformNone(rgb);
+  } else if (which == ${ViewTransform.Gamma22}) {
+    return viewTransformGamma22(rgb);
+  } else if (which == ${ViewTransform.K1S1}) {
+    return viewTransformK1S1(rgb);
+  }
 }
 
 void main(void) {
@@ -89,8 +139,8 @@ void main(void) {
         for (int x = 0; x <= 2 * windowRadius; ++x) {
             for (int y = 0; y <= 2 * windowRadius; ++y) {
                 vec2 offset = vec2(float(x - windowRadius), float(y - windowRadius));
-                float a = luminance(tonemap(lookupOffset(imASampler, position, offset)));
-                float b = luminance(tonemap(lookupOffset(imBSampler, position, offset)));
+                float a = luminance(applyViewTransform(lookupOffset(imASampler, position, offset), viewTransform));
+                float b = luminance(applyViewTransform(lookupOffset(imBSampler, position, offset), viewTransform));
                 aSum += a; bSum += b;
                 aaSum += a * a; bbSum += b * b;
                 abSum += a * b;
@@ -114,15 +164,16 @@ void main(void) {
 
     if (mode == ${DrawMode.LDR}) {
         col = pow(col, vec3(2.2));
-        col = offset + exposure * col;
-        col = pow(col, vec3(1.0 / gamma));
+        col = GOG(col, exposure, offset, gamma);
+        col = applyViewTransform(col, viewTransform);
     } else if (mode == ${DrawMode.HDR}) {
-        col = offset + exposure * col;
-        col = pow(col, vec3(1.0 / gamma));
+        col = GOG(col, exposure, offset, gamma);
+        col = applyViewTransform(col, viewTransform);
     } else {
         float avg = (col.r + col.g + col.b) * 0.3333333333 * exposure;
         col = texture2D(cmapSampler, vec2(avg, 0.0)).rgb;
     }
+
     gl_FragColor = vec4(col, 1.0);
 }`;
 
@@ -170,6 +221,7 @@ interface WebGlUniforms {
   imASampler: WebGLUniformLocation;
   imBSampler: WebGLUniformLocation;
   cmapSampler: WebGLUniformLocation;
+  viewTransform: WebGLUniformLocation;
   exposure: WebGLUniformLocation;
   offset: WebGLUniformLocation;
   gamma: WebGLUniformLocation;
@@ -178,11 +230,12 @@ interface WebGlUniforms {
 }
 
 export interface TonemappingSettings {
+  viewTransform: number;
   offset: number;
   gamma: number;
   exposure: number;
 }
-const defaultTonemapping: TonemappingSettings = { exposure: 1.0, gamma: 2.2, offset: 0.0 };
+const defaultTonemapping: TonemappingSettings = { viewTransform:0.0, exposure: 1.0, gamma: 1.0, offset: 0.0 };
 
 export type TextureCache = (image: Image) => WebGLTexture;
 
@@ -262,6 +315,7 @@ export default class ImageLayer extends Layer {
     }
     this.gl.viewport(0, 0, this.gl.drawingBufferWidth, this.gl.drawingBufferHeight);
 
+    this.gl.uniform1i(this.glUniforms.viewTransform, this.tonemappingSettings.viewTransform);
     this.gl.uniform1f(this.glUniforms.exposure, this.tonemappingSettings.exposure);
     this.gl.uniform1f(this.glUniforms.offset, this.tonemappingSettings.offset);
     this.gl.uniform1f(this.glUniforms.gamma, this.tonemappingSettings.gamma);
@@ -423,6 +477,7 @@ export default class ImageLayer extends Layer {
       imASampler: getUniformLocation('imASampler'),
       imBSampler: getUniformLocation('imBSampler'),
       cmapSampler: getUniformLocation('cmapSampler'),
+      viewTransform: getUniformLocation('viewTransform'),
       exposure: getUniformLocation('exposure'),
       offset: getUniformLocation('offset'),
       gamma: getUniformLocation('gamma'),
