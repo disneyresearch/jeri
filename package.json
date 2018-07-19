@@ -3,7 +3,13 @@
   "version": "1.0.0",
   "license": "Modified Apache 2.0 License (see the license file)",
   "homepage": "https://jeri.io",
-  "keywords": ["EXR", "OpenEXR", "HDR", "image", "viewer"],
+  "keywords": [
+    "EXR",
+    "OpenEXR",
+    "HDR",
+    "image",
+    "viewer"
+  ],
   "description": "JavaScript Extended-Range Image viewer",
   "dependencies": {
     "@types/react": "15.6.1",
@@ -15,11 +21,11 @@
   "devDependencies": {
     "tslint": "5.8.0",
     "tslint-react": "3.2.0",
-    "serve": "6.3.1",
+    "serve": "9.1.2",
     "typedoc": "0.9.0",
     "typescript": "2.5.3",
     "webpack": "3.8.1",
-    "file-loader": "1.1.9",
+    "file-loader": "1.1.11",
     "json-loader": "0.5.7",
     "worker-loader": "1.1.0",
     "source-map-loader": "0.2.3"
