@@ -34,6 +34,7 @@
       .then((image) => {
         const imageLayer = new ImageLayer(document.getElementById('image-layer'), image);
         const mouseLayer = new MouseLayer(document.getElementById('mouse-layer'), image);
+        mouseLayer.setEnableMouseEvents(true);
         mouseLayer.onTransformationChange(function (transformation) {
           imageLayer.setTransformation(transformation);
         });

@@ -35,6 +35,7 @@
         const imageLayer = new ImageLayer(document.getElementById('image-layer'), image);
         const textLayer = new TextLayer(document.getElementById('text-layer'), image);
         const mouseLayer = new MouseLayer(document.getElementById('mouse-layer'), image);
+        mouseLayer.setEnableMouseEvents(true);
         mouseLayer.onTransformationChange(function (transformation) {
           imageLayer.setTransformation(transformation);
           textLayer.setTransformation(transformation);
