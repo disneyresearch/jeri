@@ -78,7 +78,7 @@ function parseExr(data) {
             width,
             height
         } = exrImage;
-        const nChannels = channels.length;
+        let nChannels = channels.length;
         let exrData;
         if (nChannels === 1) {
             const z = exrImage.plane(exrImage.channels()[0]);
@@ -98,6 +98,7 @@ function parseExr(data) {
                 exrData[i * 3 + 1] = g[i];
                 exrData[i * 3 + 2] = b[i];
             }
+            nChannels = 3;
         } else {
             throw new Error('EXR image not supported');
         }
