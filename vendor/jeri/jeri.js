@@ -67,7 +67,7 @@ return /******/ (function(modules) { // webpackBootstrap
 /******/ 	__webpack_require__.o = function(object, property) { return Object.prototype.hasOwnProperty.call(object, property); };
 /******/
 /******/ 	// __webpack_public_path__
-/******/ 	__webpack_require__.p = "/";
+/******/ 	__webpack_require__.p = "./";
 /******/
 /******/ 	// Load entry module and return exports
 /******/ 	return __webpack_require__(__webpack_require__.s = 14);
@@ -3230,10 +3230,12 @@ var ImageFrame = /** @class */ (function (_super) {
     ImageFrame.prototype.updateCanvasProps = function (previousProps) {
         if (previousProps === void 0) { previousProps = null; }
         if (!previousProps ||
+            previousProps.viewTransform !== this.props.viewTransform ||
             previousProps.exposure !== this.props.exposure ||
             previousProps.gamma !== this.props.gamma ||
             previousProps.offset !== this.props.offset) {
             this.imageLayer.setTonemapping({
+                viewTransform: this.props.viewTransform,
                 exposure: this.props.exposure,
                 offset: this.props.offset,
                 gamma: this.props.gamma
@@ -3277,8 +3279,14 @@ var DrawMode;
     DrawMode[DrawMode["HDR"] = 1] = "HDR";
     DrawMode[DrawMode["ColorMap"] = 2] = "ColorMap";
 })(DrawMode || (DrawMode = {}));
+var ViewTransform;
+(function (ViewTransform) {
+    ViewTransform[ViewTransform["None"] = -1] = "None";
+    ViewTransform[ViewTransform["Gamma22"] = 0] = "Gamma22";
+    ViewTransform[ViewTransform["K1S1"] = 1] = "K1S1";
+})(ViewTransform || (ViewTransform = {}));
 var vertexShaderSource = "\nattribute vec3 aVertexPosition;\nattribute vec2 aTextureCoord;\nvarying vec2 vTextureCoord;\nuniform mat4 viewMatrix;\nvoid main(void) {\n    gl_Position = viewMatrix * vec4(aVertexPosition, 1.0);\n    vTextureCoord = aTextureCoord;\n}";
-var fragmentShaderSource = "\nprecision mediump float;\nuniform float exposure;\nuniform float offset;\nuniform float gamma;\nuniform int mode;\nuniform int nChannels;\nuniform int lossFunction;\nuniform int imageHeight; // Height and width are used to access neighboring pixels\nuniform int imageWidth;\nvarying vec2 vTextureCoord;\nuniform sampler2D imASampler;\nuniform sampler2D imBSampler;\nuniform sampler2D cmapSampler;\n\nvec3 lookupOffset(sampler2D sampler, vec2 position, vec2 offset) {\n    // Read neighbouring pixels from an image texture\n    // Takes 'position' (range 0 - 1) and an integer pixel offset 'offset'\n    vec2 imageSize = vec2(imageWidth, imageHeight);\n    return texture2D(sampler, position + offset / imageSize).rgb;\n}\n\nfloat luminance(vec3 rgb) {\n  return dot(vec3(0.2126, 0.7152, 0.0722), rgb);\n}\n\nvec3 tonemap(vec3 rgb) {\n  float exponent = 1.0 / 2.2;\n  return pow(max(rgb, 0.0), vec3(exponent, exponent, exponent));\n}\n\nvoid main(void) {\n    vec3 col;\n    vec2 position = vec2(vTextureCoord.s, vTextureCoord.t);\n    if (lossFunction == " + Layer_1.LossFunction.L1 + ") {\n        col = texture2D(imASampler, position).rgb;\n        col = col - texture2D(imBSampler, position).rgb;\n        col = abs(col);\n    } else if (lossFunction == " + Layer_1.LossFunction.MAPE + ") {\n        vec3 img = texture2D(imASampler, position).rgb;\n        vec3 ref = texture2D(imBSampler, position).rgb;\n        vec3 diff = img - ref;\n        col = abs(diff) / (abs(ref) + 1e-2);\n    } else if (lossFunction == " + Layer_1.LossFunction.SMAPE + ") {\n        vec3 img = texture2D(imASampler, position).rgb;\n        vec3 ref = texture2D(imBSampler, position).rgb;\n        vec3 diff = img - ref;\n        col = 2.0 * abs(diff) / (abs(ref) + abs(img) + 2e-2);\n    } else if (lossFunction == " + Layer_1.LossFunction.MRSE + ") {\n        vec3 img = texture2D(imASampler, position).rgb;\n        vec3 ref = texture2D(imBSampler, position).rgb;\n        vec3 diff = img - ref;\n        col = diff * diff / (ref * ref + 1e-4);\n    } else if (lossFunction == " + Layer_1.LossFunction.L2 + ") {\n        vec3 img = texture2D(imASampler, position).rgb;\n        vec3 ref = texture2D(imBSampler, position).rgb;\n        vec3 diff = img - ref;\n        col = diff * diff;\n    } else if (lossFunction == " + Layer_1.LossFunction.SSIM + ") {\n        const int windowRadius = 2; // We use a symmetric 5x5 window as opposed to the customary 8x8 (wiki)\n        const float L = 1.; // The dynamic range\n        const float k1 = 0.01, k2 = 0.03; // Default constants\n        const float c1 = (k1*L)*(k1*L), c2 = (k2*L)*(k2*L);\n        const float n = float((2 * windowRadius + 1) * (2 * windowRadius + 1));\n\n        // Compute means and standard deviations of both images\n        float aSum, aaSum, bSum, bbSum, abSum;\n        for (int x = 0; x <= 2 * windowRadius; ++x) {\n            for (int y = 0; y <= 2 * windowRadius; ++y) {\n                vec2 offset = vec2(float(x - windowRadius), float(y - windowRadius));\n                float a = luminance(tonemap(lookupOffset(imASampler, position, offset)));\n                float b = luminance(tonemap(lookupOffset(imBSampler, position, offset)));\n                aSum += a; bSum += b;\n                aaSum += a * a; bbSum += b * b;\n                abSum += a * b;\n            }\n        }\n        float aMean = aSum / n, bMean = bSum / n;\n        float aVar = (aaSum - n * aMean * aMean) / (n + 1.);\n        float bVar = (bbSum - n * bMean * bMean) / (n + 1.);\n        float abCovar = (abSum - n * aMean * bMean) / (n + 1.);\n\n        float numerator = (2. * aMean * bMean + c1) * (2. * abCovar + c2);\n        float denominator = (aMean * aMean + bMean * bMean + c1) * (aVar + bVar + c2);\n        float ssim = numerator / denominator;\n        col = vec3(1. - ssim, 1. - ssim, 1. - ssim);\n    } else {\n        col = texture2D(imASampler, position).rgb;\n        if (nChannels == 1) {\n            col = vec3(col.r, col.r, col.r);\n        }\n    }\n\n    if (mode == " + DrawMode.LDR + ") {\n        col = pow(col, vec3(2.2));\n        col = offset + exposure * col;\n        col = pow(col, vec3(1.0 / gamma));\n    } else if (mode == " + DrawMode.HDR + ") {\n        col = offset + exposure * col;\n        col = pow(col, vec3(1.0 / gamma));\n    } else {\n        float avg = (col.r + col.g + col.b) * 0.3333333333 * exposure;\n        col = texture2D(cmapSampler, vec2(avg, 0.0)).rgb;\n    }\n    gl_FragColor = vec4(col, 1.0);\n}";
+var fragmentShaderSource = "\nprecision mediump float;\nuniform int viewTransform;\nuniform float exposure;\nuniform float offset;\nuniform float gamma;\nuniform int mode;\nuniform int nChannels;\nuniform int lossFunction;\nuniform int imageHeight; // Height and width are used to access neighboring pixels\nuniform int imageWidth;\nvarying vec2 vTextureCoord;\nuniform sampler2D imASampler;\nuniform sampler2D imBSampler;\nuniform sampler2D cmapSampler;\n\nvec3 lookupOffset(sampler2D sampler, vec2 position, vec2 offset) {\n    // Read neighbouring pixels from an image texture\n    // Takes 'position' (range 0 - 1) and an integer pixel offset 'offset'\n    vec2 imageSize = vec2(imageWidth, imageHeight);\n    return texture2D(sampler, position + offset / imageSize).rgb;\n}\n\nfloat log10(float a) {\n  const float logBase10 = 1.0 / log2( 10.0 );\n\n  return log2(a) * logBase10;\n}\n\nfloat luminance(vec3 rgb) {\n  return dot(vec3(0.2126, 0.7152, 0.0722), rgb);\n}\n\nvec3 GOG(vec3 rgb, float gain, float offset, float gamma) {\n  return pow(gain * rgb + offset, vec3(1.0 / gamma));\n}\n\nfloat logEncodingLogC(float a) {\n  float LogC = a >= 0.01059106816664 ? 0.385537 + 0.2471896 * log10(a * 5.555556 + 0.052272) : a * 5.367655 + 0.092809;\n\n  return LogC;\n}\n\nfloat sigmoidK1S1(float a) {\n  float sigmoid = 1.0 / (1.0 + pow(2.718281828459045, -8.9 * (a - 0.435)));\n\n  return sigmoid;\n}\n\nvec3 viewTransformNone(vec3 rgb) {\n  return rgb;\n}\n\nvec3 viewTransformGamma22(vec3 rgb) {\n  const float exponent = 1.0 / 2.2;\n\n  return pow(max(rgb, 0.0), vec3(exponent, exponent, exponent));\n}\n\nvec3 viewTransformK1S1(vec3 rgb) {\n  vec3 LogC = vec3(logEncodingLogC(rgb.x), logEncodingLogC(rgb.y), logEncodingLogC(rgb.z));\n\n  return vec3(sigmoidK1S1(LogC.x), sigmoidK1S1(LogC.y), sigmoidK1S1(LogC.z));\n}\n\nvec3 applyViewTransform(vec3 rgb, int which) {\n  if (which == " + ViewTransform.None + ") {\n    return viewTransformNone(rgb);\n  } else if (which == " + ViewTransform.Gamma22 + ") {\n    return viewTransformGamma22(rgb);\n  } else if (which == " + ViewTransform.K1S1 + ") {\n    return viewTransformK1S1(rgb);\n  }\n}\n\nvoid main(void) {\n    vec3 col;\n    vec2 position = vec2(vTextureCoord.s, vTextureCoord.t);\n    if (lossFunction == " + Layer_1.LossFunction.L1 + ") {\n        col = texture2D(imASampler, position).rgb;\n        col = col - texture2D(imBSampler, position).rgb;\n        col = abs(col);\n    } else if (lossFunction == " + Layer_1.LossFunction.MAPE + ") {\n        vec3 img = texture2D(imASampler, position).rgb;\n        vec3 ref = texture2D(imBSampler, position).rgb;\n        vec3 diff = img - ref;\n        col = abs(diff) / (abs(ref) + 1e-2);\n    } else if (lossFunction == " + Layer_1.LossFunction.SMAPE + ") {\n        vec3 img = texture2D(imASampler, position).rgb;\n        vec3 ref = texture2D(imBSampler, position).rgb;\n        vec3 diff = img - ref;\n        col = 2.0 * abs(diff) / (abs(ref) + abs(img) + 2e-2);\n    } else if (lossFunction == " + Layer_1.LossFunction.MRSE + ") {\n        vec3 img = texture2D(imASampler, position).rgb;\n        vec3 ref = texture2D(imBSampler, position).rgb;\n        vec3 diff = img - ref;\n        col = diff * diff / (ref * ref + 1e-4);\n    } else if (lossFunction == " + Layer_1.LossFunction.L2 + ") {\n        vec3 img = texture2D(imASampler, position).rgb;\n        vec3 ref = texture2D(imBSampler, position).rgb;\n        vec3 diff = img - ref;\n        col = diff * diff;\n    } else if (lossFunction == " + Layer_1.LossFunction.SSIM + ") {\n        const int windowRadius = 2; // We use a symmetric 5x5 window as opposed to the customary 8x8 (wiki)\n        const float L = 1.; // The dynamic range\n        const float k1 = 0.01, k2 = 0.03; // Default constants\n        const float c1 = (k1*L)*(k1*L), c2 = (k2*L)*(k2*L);\n        const float n = float((2 * windowRadius + 1) * (2 * windowRadius + 1));\n\n        // Compute means and standard deviations of both images\n        float aSum, aaSum, bSum, bbSum, abSum;\n        for (int x = 0; x <= 2 * windowRadius; ++x) {\n            for (int y = 0; y <= 2 * windowRadius; ++y) {\n                vec2 offset = vec2(float(x - windowRadius), float(y - windowRadius));\n                float a = luminance(applyViewTransform(lookupOffset(imASampler, position, offset), viewTransform));\n                float b = luminance(applyViewTransform(lookupOffset(imBSampler, position, offset), viewTransform));\n                aSum += a; bSum += b;\n                aaSum += a * a; bbSum += b * b;\n                abSum += a * b;\n            }\n        }\n        float aMean = aSum / n, bMean = bSum / n;\n        float aVar = (aaSum - n * aMean * aMean) / (n + 1.);\n        float bVar = (bbSum - n * bMean * bMean) / (n + 1.);\n        float abCovar = (abSum - n * aMean * bMean) / (n + 1.);\n\n        float numerator = (2. * aMean * bMean + c1) * (2. * abCovar + c2);\n        float denominator = (aMean * aMean + bMean * bMean + c1) * (aVar + bVar + c2);\n        float ssim = numerator / denominator;\n        col = vec3(1. - ssim, 1. - ssim, 1. - ssim);\n    } else {\n        col = texture2D(imASampler, position).rgb;\n        if (nChannels == 1) {\n            col = vec3(col.r, col.r, col.r);\n        }\n    }\n\n    if (mode == " + DrawMode.LDR + ") {\n        col = pow(col, vec3(2.2));\n        col = GOG(col, exposure, offset, gamma);\n        col = applyViewTransform(col, viewTransform);\n    } else if (mode == " + DrawMode.HDR + ") {\n        col = GOG(col, exposure, offset, gamma);\n        col = applyViewTransform(col, viewTransform);\n    } else {\n        float avg = (col.r + col.g + col.b) * 0.3333333333 * exposure;\n        col = texture2D(cmapSampler, vec2(avg, 0.0)).rgb;\n    }\n\n    gl_FragColor = vec4(col, 1.0);\n}";
 var imageVertices = new Float32Array([
     // X   Y     Z      U    V
     -1.0, -1.0, 0.0, 0.0, 1.0,
@@ -3307,7 +3315,7 @@ function compileShader(code, type, gl) {
     }
     return shader;
 }
-var defaultTonemapping = { exposure: 1.0, gamma: 2.2, offset: 0.0 };
+var defaultTonemapping = { viewTransform: 0.0, exposure: 1.0, gamma: 1.0, offset: 0.0 };
 /**
  * Image Layer
  */
@@ -3366,6 +3374,7 @@ var ImageLayer = /** @class */ (function (_super) {
             throw new Error('Textures need to be initialized before calling draw()');
         }
         this.gl.viewport(0, 0, this.gl.drawingBufferWidth, this.gl.drawingBufferHeight);
+        this.gl.uniform1i(this.glUniforms.viewTransform, this.tonemappingSettings.viewTransform);
         this.gl.uniform1f(this.glUniforms.exposure, this.tonemappingSettings.exposure);
         this.gl.uniform1f(this.glUniforms.offset, this.tonemappingSettings.offset);
         this.gl.uniform1f(this.glUniforms.gamma, this.tonemappingSettings.gamma);
@@ -3491,6 +3500,7 @@ var ImageLayer = /** @class */ (function (_super) {
             imASampler: getUniformLocation('imASampler'),
             imBSampler: getUniformLocation('imBSampler'),
             cmapSampler: getUniformLocation('cmapSampler'),
+            viewTransform: getUniformLocation('viewTransform'),
             exposure: getUniformLocation('exposure'),
             offset: getUniformLocation('offset'),
             gamma: getUniformLocation('gamma'),
@@ -7061,6 +7071,7 @@ var ImageViewer = /** @class */ (function (_super) {
         _this.state = {
             activeRow: 0,
             selection: _this.getDefaultSelection(_this.menuData).slice(1),
+            viewTransform: { default: 0.0 },
             exposure: { default: 1.0 },
             helpIsOpen: false,
             defaultTransformation: linalg_1.Matrix4x4.create(),
@@ -7108,7 +7119,7 @@ var ImageViewer = /** @class */ (function (_super) {
         return (React.createElement(MainDiv, { innerRef: function (div) { return _this.mainContainer = div; } },
             React.createElement("div", null, rows.map(function (row, i) { return (React.createElement(navigation_1.NavRow, { key: row.title, row: row, selection: _this.state.selection[i], handleClick: _this.navigateTo.bind(_this, rows, i), removeCommonPrefix: _this.props.removeCommonPrefix, active: _this.state.activeRow === i })); })),
             React.createElement(ImageArea, null,
-                React.createElement(ImageFrameWithLoading_1.default, { exposure: this.state.exposure[imageSpec.tonemapGroup] || 1.0, gamma: 2.2, offset: 0.0, imageSpec: imageSpec, ref: function (frame) { return _this.imageFrame = (frame != null) ? frame.imageFrame : null; }, allowMovement: true, enableMouseEvents: this.state.hasFocus }),
+                React.createElement(ImageFrameWithLoading_1.default, { viewTransform: this.state.viewTransform[imageSpec.tonemapGroup], exposure: this.state.exposure[imageSpec.tonemapGroup] || 1.0, gamma: 1.0, offset: 0.0, imageSpec: imageSpec, ref: function (frame) { return _this.imageFrame = (frame != null) ? frame.imageFrame : null; }, allowMovement: true, enableMouseEvents: this.state.hasFocus }),
                 this.state.helpIsOpen ? React.createElement(HelpScreen_1.default, null) : null)));
     };
     /**
@@ -7330,6 +7341,14 @@ var ImageViewer = /** @class */ (function (_super) {
         actionsUnderShift.ArrowDown = moveUpDown(1);
         actions['['] = moveUpDown(-1);
         actions[']'] = moveUpDown(1);
+        // ViewTransform controls
+        var changeViewTransform = function () { return function () {
+            var tonemapGroup = _this.imageSpec().tonemapGroup;
+            var viewTransform = __assign({}, _this.state.viewTransform, (_a = {}, _a[tonemapGroup] = (Math.abs(_this.state.viewTransform[tonemapGroup] - 1)), _a));
+            _this.setState({ viewTransform: viewTransform });
+            var _a;
+        }; };
+        actions.t = changeViewTransform();
         // Exposure controls
         var changeExposure = function (multiplier) { return function () {
             var tonemapGroup = _this.imageSpec().tonemapGroup;
@@ -7341,6 +7360,7 @@ var ImageViewer = /** @class */ (function (_super) {
         actions.E = changeExposure(1.0 / 1.1);
         // Reset
         actions.r = function () {
+            _this.setState({ viewTransform: { default: 0.0 } });
             _this.setState({ exposure: { default: 1.0 } });
             if (_this.imageFrame) {
                 _this.imageFrame.reset();
@@ -7504,7 +7524,7 @@ exports.default = function () {
                     React.createElement("td", null, "Navigate through the menu")),
                 React.createElement("tr", null,
                     React.createElement("th", null, "Shift + click"),
-                    React.createElement("td", null, "Open a tab, and activate keyboard shortcuts for the row clicked.")),
+                    React.createElement("td", null, "Open a tab, and activate keyboard shortcuts for the row clicked")),
                 React.createElement("tr", null,
                     React.createElement("th", null, "e / E"),
                     React.createElement("td", null,
@@ -7513,7 +7533,10 @@ exports.default = function () {
                         "xposure")),
                 React.createElement("tr", null,
                     React.createElement("th", null, "r"),
-                    React.createElement("td", null, "Reset exposure, positioning and zooming")),
+                    React.createElement("td", null, "Reset exposure, view transform, positioning and zooming")),
+                React.createElement("tr", null,
+                    React.createElement("th", null, "t"),
+                    React.createElement("td", null, "Toggle between the Gamma 2.2 and the Pseudo ARRI K1S1 view transforms")),
                 React.createElement("tr", null,
                     React.createElement("th", null, "f"),
                     React.createElement("td", null,
@@ -7583,7 +7606,7 @@ var ImageFrameWithLoading = /** @class */ (function (_super) {
         var _this = this;
         return (React.createElement(StretchingDiv, null,
             this.state.image != null ?
-                React.createElement(ImageFrame_1.default, { exposure: this.props.exposure, gamma: this.props.gamma, offset: this.props.offset, image: this.state.image, ref: function (frame) { return _this.imageFrame = frame; }, allowMovement: this.props.allowMovement, enableMouseEvents: this.props.enableMouseEvents })
+                React.createElement(ImageFrame_1.default, { viewTransform: this.props.viewTransform, exposure: this.props.exposure, gamma: this.props.gamma, offset: this.props.offset, image: this.state.image, ref: function (frame) { return _this.imageFrame = frame; }, allowMovement: this.props.allowMovement, enableMouseEvents: this.props.enableMouseEvents })
                 : null,
             this.state.isLoading ? React.createElement(LoadingOverlay, null, "Downloading ...") : null,
             this.state.errorMsg ? React.createElement(LoadingOverlay, null, this.state.errorMsg) : null));
