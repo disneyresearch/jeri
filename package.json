@@ -41,7 +41,7 @@
     "clean": "rm -rf build build_web/jeri* build_web/*.worker.js build_web/*.mem build_web/*.worker.js.map",
     "docs": "typedoc --out documentation src",
     "lint": "tslint -c tslint.json 'src/**/*.ts' 'src/**/*.tsx'",
-    "examples": "serve -s build_web"
+    "examples": "serve build_web"
   },
   "main": "build_npm/jeri.js",
   "types": "build_npm/jeri.d.ts"
