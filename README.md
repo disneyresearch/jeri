@@ -7,7 +7,7 @@ See [jeri.io](https://jeri.io/) for a live demonstration.
 ## Getting started--quick and dirty and without Webpack
 
 1. Build the network (see Contributing section), or [get the latest build](#).
-2. Copy `jeri.js`, `exr-warp.js`, `exr-warp.js.mem` and `exr.worker.js` to your project.
+2. Copy `jeri.js`, `exr-warp.js`, `exr-warp.wasm` and `exr.worker.js` to your project.
 3. Add `<script src="/jeri.js"></script>` to your webpage.
 4. See the [Examples](build_web/examples/) for use instructions. The examples can be opened in a browser by running a web-server in the `build_web` directory and then opening http://localhost:3000/examples in a browser.
 

@@ -18,25 +18,25 @@
  */
 
 
-const openexr = require('file-loader?name=exr-wrap.js!../exr-wrap/exr-wrap.js');
-require('file-loader?name=exr-wrap.js.mem!../exr-wrap/exr-wrap.js.mem');
+const exrwrapPath = require('file-loader?name=exr-wrap.js!../exr-wrap/exr-wrap.js');
+const exrwrapWasmPath = require('file-loader?name=exr-wrap.wasm!../exr-wrap/exr-wrap.wasm');
 
 let openEXRLoaded = false;
 let queuedJobs = [];
+let OpenEXR;
 
-Module = {
-    onRuntimeInitialized: function() {
-        openEXRLoaded = true;
-        while (queuedJobs.length > 0) {
-            const job = queuedJobs.shift();
-            if (job) {
-                handleJob(job);
-            }
-        }
-    }
-};
-importScripts(openexr);
-const OpenEXR = Module;
+importScripts(exrwrapPath);
+
+EXR().then(function(Module) {
+	OpenEXR = Module;
+	openEXRLoaded = true;
+	while (queuedJobs.length > 0) {
+		const job = queuedJobs.shift();
+		if (job) {
+			handleJob(job);
+		}
+	}
+});
 
 self.addEventListener('message', (event) => {
     if (!openEXRLoaded) {
