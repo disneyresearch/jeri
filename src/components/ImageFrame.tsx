@@ -99,9 +99,9 @@ export default class ImageFrame extends React.Component<ImageFrameProps, {}> {
   render() {
     return (
       <StretchingDiv>
-        <StretchingCanvas innerRef={(x) => this.imageLayerElement = x} />
-        <StretchingCanvas innerRef={(x) => this.textLayerElement = x} />
-        <StretchingCanvas innerRef={(x) => this.mouseLayerElement = x} />
+        <StretchingCanvas ref={(x) => { if (x) { this.imageLayerElement = x }}} />
+        <StretchingCanvas ref={(x) => { if (x) { this.textLayerElement = x }}} />
+        <StretchingCanvas ref={(x) => { if (x) { this.mouseLayerElement = x }}} />
       </StretchingDiv>
     );
   }

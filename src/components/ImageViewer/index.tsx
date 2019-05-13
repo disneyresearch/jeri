@@ -155,7 +155,7 @@ export default class ImageViewer extends React.Component<ImageViewerProps, Image
     const rows = this.activeRows(this.menuData, this.state.selection);
     const imageSpec = this.imageSpec();
     return (
-      <MainDiv innerRef={(div: HTMLDivElement) => this.mainContainer = div}>
+      <MainDiv ref={(div: HTMLDivElement) => this.mainContainer = div}>
         <div>
         {rows.map((row, i)  => (
           <NavRow

@@ -200,9 +200,12 @@ const colorMapTexels = new Uint8Array([
 
 function compileShader(code: string, type: number, gl: WebGLRenderingContext): WebGLShader {
     var shader = gl.createShader(type);
+    if (!shader) {
+        throw new Error(`Creating shader failed with error.`);
+    }
     gl.shaderSource(shader, code);
     gl.compileShader(shader);
-    if (!shader || !gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+    if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
         throw new Error(`Compiling shader failed with error '${gl.getShaderInfoLog(shader)}'.`);
     }
     return shader;
@@ -406,9 +409,11 @@ export default class ImageLayer extends Layer {
     const fragmentShader = compileShader(fragmentShaderSource, this.gl.FRAGMENT_SHADER, this.gl);
 
     const program = this.gl.createProgram();
-    this.gl.attachShader(program, vertexShader);
-    this.gl.attachShader(program, fragmentShader);
-    this.gl.linkProgram(program);
+    if (vertexShader && fragmentShader && program) {
+        this.gl.attachShader(program, vertexShader);
+        this.gl.attachShader(program, fragmentShader);
+        this.gl.linkProgram(program);
+    }
     if (!program || !this.gl.getProgramParameter(program, this.gl.LINK_STATUS)) {
         throw new Error('Failed to link the program.');
     }
