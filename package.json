@@ -40,7 +40,7 @@
     "build": "npm run build-npm && npm run build-web",
     "build-npm": "tsc && cp -r ./src/exr-wrap build_npm && cp -r ./src/utils/exr-parser.worker.js build_npm/utils",
     "build-web": "webpack",
-    "clean": "rm -rf build build_web/jeri* build_web/*.worker.js build_web/*.wasm build_web/*.worker.js.map",
+    "clean": "rm -rf build build_web/jeri* build_web/*.js build_web/*.wasm build_web/*.map build_npm",
     "docs": "typedoc --out documentation src",
     "lint": "tslint -c tslint.json 'src/**/*.ts' 'src/**/*.tsx'",
     "examples": "serve build_web"
