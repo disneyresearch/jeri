@@ -1,5 +1,6 @@
 const path = require('path');
 const webpack = require('webpack');
+const terser = require('terser-webpack-plugin');
 
 const config = {
   entry: {
@@ -18,22 +19,43 @@ const config = {
     extensions: ['.ts', '.tsx', '.js', '.json']
   },
   module: {
-    loaders: [
+    rules: [
+      // {
+      //   test: /exr-parser\.worker\.js$/,
+      //   use: {
+      //     loader: 'worker-loader',
+      //     options: {
+      //       name: 'exr.worker.js',
+      //       inline: false,
+      //       fallback: false
+      //     }
+      //   }
+      // },
       {
-        enforce: "pre",
         test: /\.js$/,
-        loader: "source-map-loader"
-      }
+        enforce: "pre",
+        use: [ "source-map-loader" ]
+      },
+      {
+        test: /\.wasm$/,
+        type: "javascript/auto",
+      },
     ]
   },
+  mode: 'production',
   devtool: "source-map",
-  plugins: [
-    new webpack.optimize.UglifyJsPlugin({
-      minimize: true,
-      sourceMap: true,
-      include: /\.min\.js$/,
-    }),
-  ],
+  optimization: {
+    minimize: true,
+    minimizer: [
+      new terser({
+        cache: true,
+        parallel: true,
+        sourceMap: true,
+        terserOptions: {
+        }
+      }),
+    ],
+  },
   externals: {
     react: {
       root: 'React',

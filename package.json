@@ -20,16 +20,17 @@
     "styled-components": "4.2.0"
   },
   "devDependencies": {
-    "file-loader": "1.1.11",
+    "file-loader": "3.0.1",
     "json-loader": "0.5.7",
     "serve": "11.0.0",
-    "source-map-loader": "0.2.3",
+    "source-map-loader": "0.2.4",
     "tslint": "5.16.0",
     "tslint-react": "4.0.0",
     "typedoc": "^0.14.2",
     "typescript": "^3.4.5",
-    "webpack": "3.8.1",
-    "worker-loader": "1.1.0"
+    "webpack": "4.31.0",
+    "webpack-cli": "^3.3.2",
+    "worker-loader": "2.0.0"
   },
   "peerDependencies": {
     "react": "16.8.6",

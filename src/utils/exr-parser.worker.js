@@ -17,13 +17,21 @@
  *  };
  */
 
-
-const exrwrapPath = require('file-loader?name=exr-wrap.js!../exr-wrap/exr-wrap.js');
-const exrwrapWasmPath = require('file-loader?name=exr-wrap.wasm!../exr-wrap/exr-wrap.wasm');
-
 let openEXRLoaded = false;
 let queuedJobs = [];
 let OpenEXR;
+
+self.addEventListener('message', (event) => {
+    if (!openEXRLoaded) {
+        queuedJobs.push(event.data);
+    } else {
+        handleJob(event.data);
+    }
+});
+
+
+const exrwrapPath = require('file-loader?name=exr-wrap.js!../exr-wrap/exr-wrap.js');
+const exrwrapWasmPath = require('file-loader?name=exr-wrap.wasm!../exr-wrap/exr-wrap.wasm');
 
 importScripts(exrwrapPath);
 
@@ -36,14 +44,6 @@ EXR().then(function(Module) {
 			handleJob(job);
 		}
 	}
-});
-
-self.addEventListener('message', (event) => {
-    if (!openEXRLoaded) {
-        queuedJobs.push(event.data);
-    } else {
-        handleJob(event.data);
-    }
 });
 
 function handleJob(job) {
@@ -115,4 +115,4 @@ function parseExr(data) {
         }
         console.timeEnd('Decoding EXR'); // tslint:disable-line
     }
-}
+};
