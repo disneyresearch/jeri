@@ -80,6 +80,19 @@ document.addEventListener('keyup', (ev) => {
   }
 });
 
+// A replacement editing distance
+function distance(a: string, b:string) {
+    const lenMin = Math.min(a.length, b.length)
+    const lenMax = Math.max(a.length, b.length)
+    let distance = lenMax - lenMin;
+    for (var i = 0; i < lenMin; ++i) {
+        if (a[i] !== b[i]) {
+            ++distance;
+        }
+    }
+    return distance;
+}
+
 export default class ImageViewer extends React.Component<ImageViewerProps, ImageViewerState> {
 
   static defaultProps = {
@@ -285,7 +298,7 @@ export default class ImageViewer extends React.Component<ImageViewerProps, Image
    * @param title: the title of the requested node
    *
    * For rows > rowIndex, we select children matching the current selection titles
-   * if they exist. Otherwise, we resort to the default selection (first elements).
+   * if they exist. Otherwise, we resort to lazy matching.
    */
   private navigateTo(rows: InputNode[], rowIndex: number, title: string) {
     let selection = [...this.state.selection];
@@ -301,8 +314,8 @@ export default class ImageViewer extends React.Component<ImageViewerProps, Image
   /**
    * Make sure that the current selection is valid given the current menuData
    *
-   * If a title in the selection does not exist in the respective row, take the default
-   * (first) element of the row.
+   * If a title in the selection does not exist in the respective row, take a closely matching
+   * element of the row.
    * @param wishes the desired selection, which might not be valid given the selected menu items
    */
   private validateSelection(wishes: string[], activeRow: number) {
@@ -313,11 +326,16 @@ export default class ImageViewer extends React.Component<ImageViewerProps, Image
       let candidate = root.children.find(row => row.title === wishes[i]);
       if (candidate) {
         root = candidate as InputNode;
-        selection.push(candidate.title);
+      } else if (i < wishes.length) {
+        const lastSelection = wishes[i];
+        const closest = root.children
+          .map((row) => distance(row.title, lastSelection))
+          .reduce((res, val, idx) => val < res.val ? {val:val, idx:idx} : res, {val:Number.MAX_SAFE_INTEGER,idx:0});
+        root = root.children[closest.idx] as InputNode;
       } else {
         root = root.children[0] as InputNode; // resort to the first
-        selection.push(root.title);
       }
+      selection.push(root.title);
       i++;
     }
     this.setState({
