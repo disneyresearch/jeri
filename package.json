@@ -37,6 +37,7 @@
     "react-dom": "16.8.6"
   },
   "scripts": {
+    "install": "npm run build-npm",
     "build": "npm run build-npm && npm run build-web",
     "build-npm": "tsc && cp -r ./src/exr-wrap build_npm && cp -r ./src/utils/exr-parser.worker.js build_npm/utils",
     "build-web": "webpack",
