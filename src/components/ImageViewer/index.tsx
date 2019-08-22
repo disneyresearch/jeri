@@ -7,8 +7,8 @@ import requestFullscreen from '../../utils/fullscreen';
 
 import HelpScreen from './HelpScreen';
 import ImageFrame from '../ImageFrame';
-import { lossFunctionFromString } from '../../layers/Layer';
-import ImageFrameWithLoading, { ImageSpec } from '../ImageFrameWithLoading';
+import { lossFunctionFromString, LossFunction } from '../../layers/Layer';
+import ImageFrameWithLoading, { ImageSpec, ImageSpecUrl, ImageSpecLossMap } from '../ImageFrameWithLoading';
 import { NavRow } from './navigation';
 
 const MainDiv = styled.div`
@@ -24,6 +24,36 @@ const MainDiv = styled.div`
 const ImageArea = styled.div`
   flex-grow: 1;
   position: relative;
+`;
+
+const ImageInfo = styled.div`
+  background-color: #333;
+  color: #AAA;
+  padding: 0;
+  font-size: x-small;
+`;
+
+const ImageInfoBlock = styled.span`
+  display: inline-block;
+  margin: 0px 1px;
+  padding: .2em .4em;
+  overflow: hidden;
+  text-decoration: none;
+  white-space: nowrap;
+  color: #AAA;
+`;
+
+const ImageInfoLink = styled.a`
+  display: inline-block
+  background-color: #666;
+  color: #AAA;
+  margin: 0px 1px;
+  padding: .2em .4em;
+  overflow: hidden;
+  text-decoration: none;
+  white-space: nowrap;
+  user-select: none;
+  -moz-user-select: none;
 `;
 
 export type InputTree = InputNode | InputLeaf;
@@ -194,8 +224,31 @@ export default class ImageViewer extends React.Component<ImageViewerProps, Image
           />
           {this.state.helpIsOpen ? <HelpScreen /> : null}
         </ImageArea>
+        {this.renderImageSpec(imageSpec)}
       </MainDiv>
     );
+  }
+
+  private renderImageSpec(imageSpec: ImageSpec) {
+    if (imageSpec.type === 'Difference') {
+      imageSpec = imageSpec as ImageSpecLossMap;
+      return (
+        <ImageInfo>
+          <ImageInfoBlock>{LossFunction[imageSpec.lossFunction] + ' loss: '}</ImageInfoBlock>
+          <ImageInfoLink href={imageSpec.urlA}>{imageSpec.urlA.split('/').pop()}</ImageInfoLink>
+          <ImageInfoLink href={imageSpec.urlB}>{imageSpec.urlB.split('/').pop()}</ImageInfoLink>
+        </ImageInfo>
+      );
+    } else if (imageSpec.type === 'Url') {
+      imageSpec = imageSpec as ImageSpecUrl;
+      return (
+        <ImageInfo>
+          <ImageInfoLink href={imageSpec.url}>{imageSpec.url.split('/').pop()}</ImageInfoLink>
+        </ImageInfo>
+      );
+    } else {
+      return (<ImageInfo></ImageInfo>);
+    }
   }
 
   /**
