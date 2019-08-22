@@ -36,10 +36,8 @@ const ImageInfo = styled.div`
 const ImageInfoBlock = styled.span`
   display: inline-block;
   margin: 0px 1px;
-  padding: .2em .4em;
-  overflow: hidden;
+  padding: .4em .6em;
   text-decoration: none;
-  white-space: nowrap;
   color: #AAA;
 `;
 
@@ -48,10 +46,8 @@ const ImageInfoLink = styled.a`
   background-color: #666;
   color: #AAA;
   margin: 0px 1px;
-  padding: .2em .4em;
-  overflow: hidden;
+  padding: .4em .6em;
   text-decoration: none;
-  white-space: nowrap;
   user-select: none;
   -moz-user-select: none;
 `;
@@ -94,6 +90,7 @@ export interface ImageViewerProps {
   baseUrl: string;             /** Prefix for all images */
   sortMenu: boolean;           /** Whether to sort the menu-items automatically */
   removeCommonPrefix: boolean; /** Should common prefices of menu names be shortened. */
+  showInfo: boolean;           /** Should the info footer be shown */
 }
 
 
@@ -129,6 +126,7 @@ export default class ImageViewer extends React.Component<ImageViewerProps, Image
     baseUrl: '',
     sortMenu: false,
     removeCommonPrefix: false,
+    showInfo: true,
   };
 
   /** A sorted version of props.data, cached for efficiency and recomputed when props change */
@@ -230,13 +228,17 @@ export default class ImageViewer extends React.Component<ImageViewerProps, Image
   }
 
   private renderImageSpec(imageSpec: ImageSpec) {
+    if (!this.props.showInfo) {
+      return <></>;
+    }
     if (imageSpec.type === 'Difference') {
       imageSpec = imageSpec as ImageSpecLossMap;
       return (
         <ImageInfo>
-          <ImageInfoBlock>{LossFunction[imageSpec.lossFunction] + ' loss: '}</ImageInfoBlock>
           <ImageInfoLink href={imageSpec.urlA}>{imageSpec.urlA.split('/').pop()}</ImageInfoLink>
           <ImageInfoLink href={imageSpec.urlB}>{imageSpec.urlB.split('/').pop()}</ImageInfoLink>
+          <ImageInfoBlock>Loss: {LossFunction[imageSpec.lossFunction]}</ImageInfoBlock>
+          <ImageInfoBlock>Exposure: {(this.state.exposure[imageSpec.tonemapGroup] || 1.0).toPrecision(3)}</ImageInfoBlock>
         </ImageInfo>
       );
     } else if (imageSpec.type === 'Url') {
@@ -244,10 +246,11 @@ export default class ImageViewer extends React.Component<ImageViewerProps, Image
       return (
         <ImageInfo>
           <ImageInfoLink href={imageSpec.url}>{imageSpec.url.split('/').pop()}</ImageInfoLink>
+          <ImageInfoBlock>Exposure: {this.state.exposure[imageSpec.tonemapGroup].toPrecision(3) || 1.0}</ImageInfoBlock>
         </ImageInfo>
       );
     } else {
-      return (<ImageInfo></ImageInfo>);
+      return <></>;
     }
   }
 
