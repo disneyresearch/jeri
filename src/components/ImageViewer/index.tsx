@@ -145,9 +145,11 @@ export default class ImageViewer extends React.Component<ImageViewerProps, Image
       this.menuData = this.sortMenuRows(this.menuData);
     }
     // Set the initial state
+    let selection = this.props.selection ? this.props.selection : this.getDefaultSelection(this.menuData).slice(1);
+    selection = this.validateSelection(selection);
     this.state = {
       activeRow: 0,
-      selection: this.props.selection ? this.props.selection : this.getDefaultSelection(this.menuData).slice(1),
+      selection: selection,
       viewTransform: { default: 0.0 },
       exposure: { default: 1.0 },
       helpIsOpen: false,
@@ -162,26 +164,40 @@ export default class ImageViewer extends React.Component<ImageViewerProps, Image
   }
 
   componentDidMount() {
+    if (this.props.onSelectionChange) {
+      this.props.onSelectionChange(this.state.selection);
+    }
     this.mainContainer.setAttribute('tabindex', '1');
     this.mainContainer.addEventListener('keydown', this.keyboardHandler);
     this.mainContainer.addEventListener('focus', this.setFocus);
     this.mainContainer.addEventListener('focusout', this.unsetFocus);
-    this.validateSelection(this.state.selection, this.state.activeRow);
   }
 
-  componentDidUpdate() {
+  private arrayEqual(a?: string[], b?: string[]) : Boolean {
+    if (a === b) {
+      return true;
+    }
+    if (!a || !b) {
+      return false;
+    }
+    if (a.length !== b.length) {
+      return false;
+    }
+    return a.every((v, i) => v == b[i]);
+  }
+
+  componentDidUpdate(prevProps: ImageViewerProps) {
     if (this.imageFrame && this.state.transformationNeedsUpdate) {
       this.imageFrame.setTransformation(this.state.defaultTransformation);
       this.setState({ transformationNeedsUpdate: false });
     }
-  }
-
-  componentWillReceiveProps(nextProps: ImageViewerProps) {
-    this.menuData = nextProps.data;
+    this.menuData = this.props.data;
     if (this.props.sortMenu) {
       this.menuData = this.sortMenuRows(this.menuData);
     }
-    this.validateSelection(this.state.selection, this.state.activeRow);
+    let selection = this.props.selection ? this.props.selection : this.state.selection;
+    selection = this.validateSelection(selection);
+    this.updateSelectionState(selection, this.state.activeRow);
   }
 
   componentWillUnmount() {
@@ -275,7 +291,8 @@ export default class ImageViewer extends React.Component<ImageViewerProps, Image
       const node = (tree as InputNode);
       const res = node.children.find(child => child.title === selection[0]);
       if (res == null) {
-        throw new Error(`Failed to find a match for ${selection}`);
+        // fall back to giving up
+        return [];
       } else {
         return [node].concat(this.activeRows(res, selection.slice(1)));
       }
@@ -367,7 +384,8 @@ export default class ImageViewer extends React.Component<ImageViewerProps, Image
       // Set active row on shift click
       activeRow = rowIndex;
     }
-    this.validateSelection(selection, activeRow);
+    selection = this.validateSelection(selection);
+    this.updateSelectionState(selection, activeRow);
   }
 
   /**
@@ -377,7 +395,7 @@ export default class ImageViewer extends React.Component<ImageViewerProps, Image
    * element of the row.
    * @param wishes the desired selection, which might not be valid given the selected menu items
    */
-  private validateSelection(wishes: string[], activeRow: number) {
+  private validateSelection(wishes: string[]) : string[] {
     let selection = [];
     let i = 0;
     let root = this.menuData as InputNode;
@@ -397,12 +415,27 @@ export default class ImageViewer extends React.Component<ImageViewerProps, Image
       selection.push(root.title);
       i++;
     }
-    this.setState({activeRow: Math.min(activeRow, selection.length - 1)});
-    if (this.props.onSelectionChange) {
-      this.props.onSelectionChange(selection);
+    return selection;
+  }
+
+  /**
+   * Update the selection state in the internal state or observers, depending
+   * on configuration.
+   * @param selection The selection to use
+   * @param activeRow The active row to use
+   */
+  private updateSelectionState(selection: string[], activeRow: number) {
+    if (this.state.activeRow !== activeRow) {
+      this.setState({ activeRow: Math.min(activeRow, selection.length - 1) });
     }
-    else {
-      this.setState({selection: selection});
+    if (!this.arrayEqual(this.state.selection, selection)) {
+      this.setState({ selection: selection });
+      // Only emit onSelectionChange if the property is incorrect, or not set
+      if (!this.arrayEqual(this.props.selection, selection) || !this.props.selection) {
+        if (this.props.onSelectionChange) {
+          this.props.onSelectionChange(selection);
+        }
+      }
     }
   }
 
