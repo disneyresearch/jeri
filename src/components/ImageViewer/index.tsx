@@ -91,6 +91,8 @@ export interface ImageViewerProps {
   sortMenu: boolean;           /** Whether to sort the menu-items automatically */
   removeCommonPrefix: boolean; /** Should common prefices of menu names be shortened. */
   showInfo: boolean;           /** Should the info footer be shown */
+  selection?: string[];         /** List of item titles that are selected */
+  onSelectionChange?: (selection: string[]) => void; /** The selection changed callback */
 }
 
 
@@ -145,7 +147,7 @@ export default class ImageViewer extends React.Component<ImageViewerProps, Image
     // Set the initial state
     this.state = {
       activeRow: 0,
-      selection: this.getDefaultSelection(this.menuData).slice(1),
+      selection: this.props.selection ? this.props.selection : this.getDefaultSelection(this.menuData).slice(1),
       viewTransform: { default: 0.0 },
       exposure: { default: 1.0 },
       helpIsOpen: false,
@@ -164,6 +166,7 @@ export default class ImageViewer extends React.Component<ImageViewerProps, Image
     this.mainContainer.addEventListener('keydown', this.keyboardHandler);
     this.mainContainer.addEventListener('focus', this.setFocus);
     this.mainContainer.addEventListener('focusout', this.unsetFocus);
+    this.validateSelection(this.state.selection, this.state.activeRow);
   }
 
   componentDidUpdate() {
@@ -394,10 +397,13 @@ export default class ImageViewer extends React.Component<ImageViewerProps, Image
       selection.push(root.title);
       i++;
     }
-    this.setState({
-      selection: selection,
-      activeRow: Math.min(activeRow, selection.length - 1),
-    });
+    this.setState({activeRow: Math.min(activeRow, selection.length - 1)});
+    if (this.props.onSelectionChange) {
+      this.props.onSelectionChange(selection);
+    }
+    else {
+      this.setState({selection: selection});
+    }
   }
 
   /**
