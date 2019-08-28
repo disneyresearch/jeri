@@ -403,7 +403,7 @@ export default class ImageViewer extends React.Component<ImageViewerProps, Image
       let candidate = root.children.find(row => row.title === wishes[i]);
       if (candidate) {
         root = candidate as InputNode;
-      } else if (i < wishes.length) {
+      } else if (i < wishes.length && wishes[i]) {
         const lastSelection = wishes[i];
         const closest = root.children
           .map((row) => distance(row.title, lastSelection))
