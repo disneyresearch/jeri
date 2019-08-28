@@ -191,13 +191,22 @@ export default class ImageViewer extends React.Component<ImageViewerProps, Image
       this.imageFrame.setTransformation(this.state.defaultTransformation);
       this.setState({ transformationNeedsUpdate: false });
     }
-    this.menuData = this.props.data;
-    if (this.props.sortMenu) {
-      this.menuData = this.sortMenuRows(this.menuData);
+    // This shouldn't be a member but used directly from props, or be in state
+    if (this.props.data !== prevProps.data) {
+      this.menuData = this.props.data;
+      if (this.props.sortMenu) {
+        this.menuData = this.sortMenuRows(this.menuData);
+      }
+      this.forceUpdate(); // force update since the data is not in props or state
     }
+    // Carefully validate selection and update copies everywhere without creating too
+    // many dependency cycles
     let selection = this.props.selection ? this.props.selection : this.state.selection;
     selection = this.validateSelection(selection);
     this.updateSelectionState(selection, this.state.activeRow);
+    if (this.props.data !== prevProps.data) {
+      this.setState({activeRow: this.state.activeRow});
+    }
   }
 
   componentWillUnmount() {
