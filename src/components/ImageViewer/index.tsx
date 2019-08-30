@@ -1,4 +1,6 @@
 import * as React from 'react';
+import memoizeOne from "memoize-one";
+import { isEqual } from 'lodash';
 import styled from 'styled-components';
 import { Matrix4x4 } from '../../utils/linalg';
 
@@ -86,7 +88,7 @@ export interface ImageViewerState {
 }
 
 export interface ImageViewerProps {
-  data: InputTree;             /** Unsorted input tree, use the sorted this.menuData instead */
+  data: InputTree;             /** Unsorted input tree, use the accessor this.getMenu() instead */
   baseUrl: string;             /** Prefix for all images */
   sortMenu: boolean;           /** Whether to sort the menu-items automatically */
   removeCommonPrefix: boolean; /** Should common prefices of menu names be shortened. */
@@ -131,8 +133,6 @@ export default class ImageViewer extends React.Component<ImageViewerProps, Image
     showInfo: true,
   };
 
-  /** A sorted version of props.data, cached for efficiency and recomputed when props change */
-  private menuData: InputTree;
   /** A reference the the imageFrame element, ready once the ImageViewer is loaded */
   private imageFrame: ImageFrame | null;
   /** A reference to the div element of the containing div */
@@ -140,16 +140,14 @@ export default class ImageViewer extends React.Component<ImageViewerProps, Image
 
   constructor(props: ImageViewerProps) {
     super(props);
-    this.menuData = this.props.data;
-    if (props.sortMenu) {
-      this.menuData = this.sortMenuRows(this.menuData);
+    // Controlled or stand-alone component
+    if (Boolean(this.props.selection) != Boolean(this.props.onSelectionChange)) {
+      throw new Error("ImageViewer properties selection and onSelectionChange must both be set or both be unset.")
     }
     // Set the initial state
-    let selection = this.props.selection ? this.props.selection : this.getDefaultSelection(this.menuData).slice(1);
-    selection = this.validateSelection(selection);
     this.state = {
       activeRow: 0,
-      selection: selection,
+      selection: this.getDefaultSelection(this.getMenu()).slice(1),
       viewTransform: { default: 0.0 },
       exposure: { default: 1.0 },
       helpIsOpen: false,
@@ -161,11 +159,26 @@ export default class ImageViewer extends React.Component<ImageViewerProps, Image
     this.keyboardHandler = this.keyboardHandler.bind(this);
     this.setFocus = this.setFocus.bind(this);
     this.unsetFocus = this.unsetFocus.bind(this);
+    // Cache filter results
+    this.validateSelection = memoizeOne(this.validateSelection, isEqual);
+    this.sortMenuRows = memoizeOne(this.sortMenuRows, isEqual);
+  }
+
+  getSelection() {
+    let selection = this.props.selection ? this.props.selection : this.state.selection;
+    return this.validateSelection(selection, this.getMenu() as InputNode);
+  }
+
+  getMenu() {
+    if (this.props.sortMenu) {
+      return this.sortMenuRows(this.props.data);
+    }
+    return this.props.data;
   }
 
   componentDidMount() {
     if (this.props.onSelectionChange) {
-      this.props.onSelectionChange(this.state.selection);
+      this.props.onSelectionChange(this.getSelection());
     }
     this.mainContainer.setAttribute('tabindex', '1');
     this.mainContainer.addEventListener('keydown', this.keyboardHandler);
@@ -173,39 +186,26 @@ export default class ImageViewer extends React.Component<ImageViewerProps, Image
     this.mainContainer.addEventListener('focusout', this.unsetFocus);
   }
 
-  private arrayEqual(a?: string[], b?: string[]) : Boolean {
-    if (a === b) {
-      return true;
-    }
-    if (!a || !b) {
-      return false;
-    }
-    if (a.length !== b.length) {
-      return false;
-    }
-    return a.every((v, i) => v == b[i]);
-  }
-
   componentDidUpdate(prevProps: ImageViewerProps) {
     if (this.imageFrame && this.state.transformationNeedsUpdate) {
       this.imageFrame.setTransformation(this.state.defaultTransformation);
       this.setState({ transformationNeedsUpdate: false });
     }
-    // This shouldn't be a member but used directly from props, or be in state
-    if (this.props.data !== prevProps.data) {
-      this.menuData = this.props.data;
-      if (this.props.sortMenu) {
-        this.menuData = this.sortMenuRows(this.menuData);
-      }
-      this.forceUpdate(); // force update since the data is not in props or state
+    // Controlled or stand-alone component
+    if (Boolean(this.props.selection) != Boolean(this.props.onSelectionChange)) {
+      throw new Error("ImageViewer properties selection and onSelectionChange must both be set or both be unset.")
     }
-    // Carefully validate selection and update copies everywhere without creating too
-    // many dependency cycles
-    let selection = this.props.selection ? this.props.selection : this.state.selection;
-    selection = this.validateSelection(selection);
-    this.updateSelectionState(selection, this.state.activeRow);
-    if (this.props.data !== prevProps.data) {
-      this.setState({activeRow: this.state.activeRow});
+    if (this.props.selection) {
+      // If this component is controlled, notify controller of valid selection, if the props changed
+      if (!isEqual(this.props.selection, prevProps.selection)) {
+        const selection = this.getSelection();
+        if (!isEqual(selection, this.props.selection)) {
+          this.updateSelectionState(selection);
+        }
+      }
+    }
+    else {
+      // If component is not controlled, then there's nothing to do
     }
   }
 
@@ -221,8 +221,10 @@ export default class ImageViewer extends React.Component<ImageViewerProps, Image
   }
 
   render() {
-    const rows = this.activeRows(this.menuData, this.state.selection);
-    const imageSpec = this.imageSpec();
+    const menuData = this.getMenu();
+    const selection = this.getSelection();
+    const rows = this.activeRows(menuData, selection);
+    const imageSpec = this.imageSpec(selection, menuData);
     return (
       <MainDiv ref={(div: HTMLDivElement) => this.mainContainer = div}>
         <div>
@@ -230,7 +232,7 @@ export default class ImageViewer extends React.Component<ImageViewerProps, Image
           <NavRow
             key={row.title}
             row={row}
-            selection={this.state.selection[i]}
+            selection={selection[i]}
             handleClick={this.navigateTo.bind(this, rows, i)}
             removeCommonPrefix={this.props.removeCommonPrefix}
             active={this.state.activeRow === i}
@@ -342,9 +344,9 @@ export default class ImageViewer extends React.Component<ImageViewerProps, Image
   /**
    * Find the image to be shown based on the current selection
    */
-  private currentImage(currentSelection: string[] = this.state.selection): InputLeaf {
+  private currentImage(currentSelection: string[], menuData: InputTree): InputLeaf {
     let selection = [...currentSelection];
-    let tree: InputNode = this.menuData as InputNode;
+    let tree: InputNode = menuData as InputNode;
     while (selection.length > 0) {
       let entry = selection.shift();
       tree = tree.children.find(item => item.title === entry) as InputNode;
@@ -355,8 +357,8 @@ export default class ImageViewer extends React.Component<ImageViewerProps, Image
   /**
    * Specification for the current image to load
    */
-  private imageSpec(currentSelection: string[] = this.state.selection): ImageSpec {
-    const img = this.currentImage(currentSelection);
+  private imageSpec(currentSelection: string[], menuData: InputTree): ImageSpec {
+    const img = this.currentImage(currentSelection, menuData);
     if (img.hasOwnProperty('lossMap')) {
       const config = img as InputLeafLossMap;
       return {
@@ -386,28 +388,29 @@ export default class ImageViewer extends React.Component<ImageViewerProps, Image
    * if they exist. Otherwise, we resort to lazy matching.
    */
   private navigateTo(rows: InputNode[], rowIndex: number, title: string) {
-    let selection = [...this.state.selection];
+    let selection = [...this.getSelection()];
     selection[rowIndex] = title;
     let activeRow = this.state.activeRow;
     if (SHIFT_IS_DOWN) {
       // Set active row on shift click
       activeRow = rowIndex;
     }
-    selection = this.validateSelection(selection);
-    this.updateSelectionState(selection, activeRow);
+    if (this.state.activeRow !== activeRow) {
+      this.setState({ activeRow: Math.min(activeRow, selection.length - 1) });
+    }
+    this.updateSelectionState(selection);
   }
 
   /**
-   * Make sure that the current selection is valid given the current menuData
+   * Make sure that the current selection is valid given the current menu data
    *
    * If a title in the selection does not exist in the respective row, take a closely matching
    * element of the row.
    * @param wishes the desired selection, which might not be valid given the selected menu items
    */
-  private validateSelection(wishes: string[]) : string[] {
+  private validateSelection(wishes: string[], root: InputNode) : string[] {
     let selection = [];
     let i = 0;
-    let root = this.menuData as InputNode;
     while (root.hasOwnProperty('children')) {
       let candidate = root.children.find(row => row.title === wishes[i]);
       if (candidate) {
@@ -431,19 +434,20 @@ export default class ImageViewer extends React.Component<ImageViewerProps, Image
    * Update the selection state in the internal state or observers, depending
    * on configuration.
    * @param selection The selection to use
-   * @param activeRow The active row to use
    */
-  private updateSelectionState(selection: string[], activeRow: number) {
-    if (this.state.activeRow !== activeRow) {
-      this.setState({ activeRow: Math.min(activeRow, selection.length - 1) });
-    }
-    if (!this.arrayEqual(this.state.selection, selection)) {
-      this.setState({ selection: selection });
-      // Only emit onSelectionChange if the property is incorrect, or not set
-      if (!this.arrayEqual(this.props.selection, selection) || !this.props.selection) {
+  private updateSelectionState(selection: string[]) {
+    if (this.props.selection) {
+      // Controlled
+      if (!isEqual(selection, this.props.selection)) {
         if (this.props.onSelectionChange) {
           this.props.onSelectionChange(selection);
         }
+      }
+    }
+    else {
+      // Stand-alone
+      if (!isEqual(selection, this.state.selection)) {
+        this.setState({ selection: selection });
       }
     }
   }
@@ -480,7 +484,7 @@ export default class ImageViewer extends React.Component<ImageViewerProps, Image
 
     // Number keys
     const goToNumber = (i: number) => () => {
-      const rows = this.activeRows(this.menuData, this.state.selection);
+      const rows = this.activeRows(this.getMenu(), this.getSelection());
       const activeRow = this.state.activeRow;
       const goTo = rows[activeRow].children[i];
       if (goTo != null) {
@@ -494,9 +498,10 @@ export default class ImageViewer extends React.Component<ImageViewerProps, Image
 
     // Arrows
     const moveInLine = (offset: number) => () => {
-      const rows = this.activeRows(this.menuData, this.state.selection);
+      const selection = this.getSelection();
+      const rows = this.activeRows(this.getMenu(), selection);
       const activeRow = this.state.activeRow;
-      const currentTitle = this.state.selection[activeRow];
+      const currentTitle = selection[activeRow];
       const currentIndex = rows[activeRow].children.findIndex(n => n.title === currentTitle);
       const nextIndex = (currentIndex + offset + rows[activeRow].children.length) % rows[activeRow].children.length;
       const goTo = rows[activeRow].children[nextIndex];
@@ -507,12 +512,13 @@ export default class ImageViewer extends React.Component<ImageViewerProps, Image
     actions['-'] = moveInLine(-1);
     actions['='] = moveInLine(1);
     const moveUpDown = (offset: number) => () => {
+      const selection = this.getSelection();
       let nextRow = this.state.activeRow + offset;
       if (nextRow < 0) {
         nextRow = 0;
       }
-      if (nextRow >= this.state.selection.length - 1) {
-        nextRow = this.state.selection.length - 1;
+      if (nextRow >= selection.length - 1) {
+        nextRow = selection.length - 1;
       }
       this.setState({ activeRow: nextRow });
     };
@@ -523,7 +529,8 @@ export default class ImageViewer extends React.Component<ImageViewerProps, Image
 
     // ViewTransform controls
     const changeViewTransform = () => () => {
-      const tonemapGroup = this.imageSpec().tonemapGroup;
+      const selection = this.getSelection();
+      const tonemapGroup = this.imageSpec(selection, this.getMenu()).tonemapGroup;
       const viewTransform = {
         ...this.state.viewTransform,
         [tonemapGroup]: (Math.abs(this.state.viewTransform[tonemapGroup] - 1))
@@ -534,7 +541,8 @@ export default class ImageViewer extends React.Component<ImageViewerProps, Image
 
     // Exposure controls
     const changeExposure = (multiplier: number) => () => {
-      const tonemapGroup = this.imageSpec().tonemapGroup;
+      const selection = this.getSelection();
+      const tonemapGroup = this.imageSpec(selection, this.getMenu()).tonemapGroup;
       const exposure = {
         ...this.state.exposure,
         [tonemapGroup]: multiplier * (this.state.exposure[tonemapGroup] || 1.0)

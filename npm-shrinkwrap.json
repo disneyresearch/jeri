@@ -76,6 +76,16 @@
       "resolved": "https://registry.npmjs.org/@emotion/unitless/-/unitless-0.7.3.tgz",
       "integrity": "sha512-4zAPlpDEh2VwXswwr/t8xGNDGg8RQiPxtxZ3qQEXyQsBV39ptTdESCjuBvGze1nLMVrxmTIKmnO/nAV8Tqjjzg=="
     },
+    "@types/lodash": {
+      "version": "4.14.138",
+      "resolved": "https://registry.npmjs.org/@types/lodash/-/lodash-4.14.138.tgz",
+      "integrity": "sha512-A4uJgHz4hakwNBdHNPdxOTkYmXNgmUAKLbXZ7PKGslgeV0Mb8P3BlbYfPovExek1qnod4pDfRbxuzcVs3dlFLg=="
+    },
+    "@types/memoize-one": {
+      "version": "4.1.1",
+      "resolved": "https://registry.npmjs.org/@types/memoize-one/-/memoize-one-4.1.1.tgz",
+      "integrity": "sha512-+9djKUUn8hOyktLCfCy4hLaIPgDNovaU36fsnZe9trFHr6ddlbIn2q0SEsnkCkNR+pBWEU440Molz/+Mpyf+gQ=="
+    },
     "@types/minimatch": {
       "version": "3.0.3",
       "resolved": "https://registry.npmjs.org/@types/minimatch/-/minimatch-3.0.3.tgz",
@@ -3014,9 +3024,9 @@
       }
     },
     "memoize-one": {
-      "version": "5.0.4",
-      "resolved": "https://registry.npmjs.org/memoize-one/-/memoize-one-5.0.4.tgz",
-      "integrity": "sha512-P0z5IeAH6qHHGkJIXWw0xC2HNEgkx/9uWWBQw64FJj3/ol14VYdfVGWWr0fXfjhhv3TKVIqUq65os6O4GUNksA=="
+      "version": "5.1.1",
+      "resolved": "https://registry.npmjs.org/memoize-one/-/memoize-one-5.1.1.tgz",
+      "integrity": "sha512-HKeeBpWvqiVJD57ZUAsJNm71eHTykffzcLZVYWiVfQeI1rJtuEaS7hQiEpWfVVk18donPwJEcFKIkCmPJNOhHA=="
     },
     "memory-fs": {
       "version": "0.4.1",
