@@ -276,8 +276,8 @@ export default class ImageViewer extends React.Component<ImageViewerProps, Image
       return (
         <ImageInfo>
           <ImageInfoLink href={imageSpec.url}>{imageSpec.url.split('/').pop()}</ImageInfoLink>
-          <ImageInfoBlock>Exposure: {this.state.exposure[imageSpec.tonemapGroup].toPrecision(3) || 1.0}</ImageInfoBlock>
-        </ImageInfo>
+          <ImageInfoBlock>Exposure: {(this.state.exposure[imageSpec.tonemapGroup] || 1.0).toPrecision(3)}</ImageInfoBlock>
+	</ImageInfo>
       );
     } else {
       return <></>;
