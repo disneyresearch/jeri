@@ -13,7 +13,7 @@ const config = {
     libraryTarget: 'umd',
     library: 'Jeri',
     umdNamedDefine: true,
-    publicPath: '/',
+    publicPath: './',
   },
   resolve: {
     extensions: ['.ts', '.tsx', '.js', '.json']
