@@ -76,6 +76,11 @@
       "resolved": "https://registry.npmjs.org/@emotion/unitless/-/unitless-0.7.3.tgz",
       "integrity": "sha512-4zAPlpDEh2VwXswwr/t8xGNDGg8RQiPxtxZ3qQEXyQsBV39ptTdESCjuBvGze1nLMVrxmTIKmnO/nAV8Tqjjzg=="
     },
+    "@types/fast-levenshtein": {
+      "version": "0.0.1",
+      "resolved": "https://registry.npmjs.org/@types/fast-levenshtein/-/fast-levenshtein-0.0.1.tgz",
+      "integrity": "sha1-OjYVzxc2Rcj8pY0FHk4ygk5L0oY="
+    },
     "@types/lodash": {
       "version": "4.14.138",
       "resolved": "https://registry.npmjs.org/@types/lodash/-/lodash-4.14.138.tgz",
@@ -1672,6 +1677,14 @@
       "integrity": "sha1-1RQsDK7msRifh9OnYREGT4bIu/I=",
       "dev": true
     },
+    "fast-levenshtein": {
+      "version": "3.0.0",
+      "resolved": "https://registry.npmjs.org/fast-levenshtein/-/fast-levenshtein-3.0.0.tgz",
+      "integrity": "sha512-hKKNajm46uNmTlhHSyZkmToAc56uZJwYq7yrciZjqOxnlfQwERDQJmHPUp7m1m9wx8vgOe8IaCKZ5Kv2k1DdCQ==",
+      "requires": {
+        "fastest-levenshtein": "^1.0.7"
+      }
+    },
     "fast-url-parser": {
       "version": "1.1.3",
       "resolved": "https://registry.npmjs.org/fast-url-parser/-/fast-url-parser-1.1.3.tgz",
@@ -1680,6 +1693,11 @@
       "requires": {
         "punycode": "^1.3.2"
       }
+    },
+    "fastest-levenshtein": {
+      "version": "1.0.12",
+      "resolved": "https://registry.npmjs.org/fastest-levenshtein/-/fastest-levenshtein-1.0.12.tgz",
+      "integrity": "sha512-On2N+BpYJ15xIC974QNVuYGMOlEVt4s0EOI3wwMqOmK1fdDY+FN/zltPV8vosq4ad4c/gJ1KHScUn/6AWIgiow=="
     },
     "figgy-pudding": {
       "version": "3.5.1",
