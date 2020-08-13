@@ -13,6 +13,8 @@ import { lossFunctionFromString, LossFunction } from '../../layers/Layer';
 import ImageFrameWithLoading, { ImageSpec, ImageSpecUrl, ImageSpecLossMap } from '../ImageFrameWithLoading';
 import { NavRow } from './navigation';
 
+import * as levenshtein from 'fast-levenshtein';
+
 const MainDiv = styled.div`
   background-color: #333;
   font-size: .9em;
@@ -113,14 +115,7 @@ document.addEventListener('keyup', (ev) => {
 
 // A replacement editing distance
 function distance(a: string, b:string) {
-    const lenMin = Math.min(a.length, b.length)
-    const lenMax = Math.max(a.length, b.length)
-    let distance = lenMax - lenMin;
-    for (var i = 0; i < lenMin; ++i) {
-        if (a[i] !== b[i]) {
-            ++distance;
-        }
-    }
+    let distance = levenshtein.get(a, b);
     return distance;
 }
 
