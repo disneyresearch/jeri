@@ -28,14 +28,14 @@
   "devDependencies": {
     "file-loader": "3.0.1",
     "json-loader": "0.5.7",
-    "serve": "11.0.0",
+    "serve": "^11.3.2",
     "source-map-loader": "0.2.4",
     "tslint": "5.16.0",
     "tslint-react": "4.0.0",
     "typedoc": "^0.15.0",
     "typescript": "^3.4.5",
     "webpack": "4.31.0",
-    "webpack-cli": "^3.3.2",
+    "webpack-cli": "^3.3.12",
     "worker-loader": "2.0.0"
   },
   "peerDependencies": {
