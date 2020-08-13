@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width">
-  <title>Example: Inset</title>
+  <title>Example: Basic</title>
   <style>
     .stretch {
       width: 100%;
@@ -11,30 +11,29 @@
       position: absolute;
       left:0; right: 0; top:0; bottom: 0;
     }
-    .inset {
-      position: absolute;
-      width: 200px;
-      height: 200px;
-      bottom: 10px;
-      right: 10px;
-      background-color: #555555;
-      z-index: 1;
-      box-shadow: 0 0 1em #000;
-    }
   </style>
 </head>
 <body>
-  Loading ...
-  <canvas id="image-layer" class="stretch"></canvas>
-  <div id="mouse-layer" class="stretch"></div>
+  <p>
+  This image viewer is part of the normal text flow:
+  </p>
 
-  <div class="inset">
-    <canvas id="image-inset" class="stretch"></canvas>
+  <div style="width:100%; height: 80vh; position: relative;">
+    <canvas id="image-layer" class="stretch"></canvas>
+    <div id="mouse-layer" class="stretch"></div>
   </div>
 
+  <p>
+  This is achieved by wrapping the image and mouse layers in a div with relative position
+  and restricted size.
+  </p>
+
+  <script>
+      window.resourceBaseUrl = '/';
+  </script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/react/16.8.6/umd/react.development.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/16.8.6/umd/react-dom.development.js"></script>
-  <script src="../jeri.js"></script>
+  <script src="./jeri.js"></script>
   <script>
     const ImageLayer = Jeri.ImageLayer;
     const MouseLayer = Jeri.MouseLayer;
@@ -44,26 +43,12 @@
 
     cache.get(imgUrl)
       .then((image) => {
-        const inset = new ImageLayer(document.getElementById('image-inset'), image);
         const imageLayer = new ImageLayer(document.getElementById('image-layer'), image);
         const mouseLayer = new MouseLayer(document.getElementById('mouse-layer'), image);
-        
         mouseLayer.setEnableMouseEvents(true);
         mouseLayer.onTransformationChange(function (transformation) {
           imageLayer.setTransformation(transformation);
         });
-
-        function handlePointing(x, y) {
-          const scale = 50;
-          const trans = [
-            scale  , 0,         0,  0,
-            0      , scale,     0,  0,
-            0      , 0,         1,  0,
-            -x*scale, -y*scale, 0,  1,
-          ];
-          inset.setTransformation(new Jeri.Matrix4x4(trans));
-        }
-        mouseLayer.onPointAt(handlePointing);
       })
       .catch((error) => console.error(error));
   </script>

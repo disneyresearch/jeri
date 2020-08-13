@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width">
-  <title>Example: JPG</title>
+  <title>Example: L1 loss</title>
   <style>
     .stretch {
       width: 100%;
@@ -20,24 +20,44 @@
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/react/16.8.6/umd/react.development.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/16.8.6/umd/react-dom.development.js"></script>
-  <script src="../jeri.js"></script>
+  <script src="./jeri.js"></script>
   <script>
     const ImageLayer = Jeri.ImageLayer;
     const MouseLayer = Jeri.MouseLayer;
 
     const cache = new Jeri.ImageCache();
-    const imgUrl = "images/test_image.jpg";
+    const imgUrl = "images/test_image.exr";
+    const refUrl = "images/test_reference.exr";
 
-    cache.get(imgUrl)
-      .then((image) => {
-        const imageLayer = new ImageLayer(document.getElementById('image-layer'), image);
-        const mouseLayer = new MouseLayer(document.getElementById('mouse-layer'), image);
+    Promise.all([cache.get(imgUrl), cache.get(refUrl)])
+      .then(([image, reference]) => {
+        const diff = {
+          type: 'Difference',
+          imageA: image,
+          imageB: reference,
+          width: image.width,
+          height: image.height,
+          nChannels: image.nChannels,
+          lossFunction: 1,
+        };
+        const imageLayer = new ImageLayer(document.getElementById('image-layer'), diff);
+        const mouseLayer = new MouseLayer(document.getElementById('mouse-layer'), diff);
         mouseLayer.setEnableMouseEvents(true);
         mouseLayer.onTransformationChange(function (transformation) {
           imageLayer.setTransformation(transformation);
         });
+        const setLoss = function (loss) {
+          diff.lossFunction = loss;
+          imageLayer.setImage(diff);
+        };
+        document.addEventListener('keydown', function (e) {
+          if (['1', '2', '3', '4', '5'].indexOf(e.key) >= 0) {
+            setLoss(parseInt(e.key));
+          }
+        });
       })
       .catch((error) => console.error(error));
+
   </script>
 </body>
 </html>
