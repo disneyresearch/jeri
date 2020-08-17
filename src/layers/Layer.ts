@@ -73,6 +73,7 @@ export enum LossFunction {
   MRSE = 4,
   SMAPE = 5,
   SSIM = 6,
+  FLIP = 7,
 }
 
 const lossFunctions = {
@@ -82,6 +83,7 @@ const lossFunctions = {
   'MRSE': LossFunction.MRSE,
   'SMAPE': LossFunction.SMAPE,
   'SSIM': LossFunction.SSIM,
+  'FLIP': LossFunction.FLIP,
 };
 
 export function lossFunctionFromString(name: string): LossFunction {
