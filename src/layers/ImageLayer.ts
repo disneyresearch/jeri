@@ -134,6 +134,11 @@ vec3 xyz2Lab(vec3 colorXYZ) {
   return lab;
 }
 
+float xyz2lum(vec3 colorXYZ) {
+  vec3 whiteTS = rgb2xyzMatrix * vec3(1.0, 1.0, 1.0);
+  return colorXYZ.y / whiteTS.y;
+}
+
 vec3 lab2hunt(vec3 colorLab) {
   // Desaturates dark colors, since their differences are less perceptible.
   float adjustment = min(0.01 * colorLab.x, 1.0);
@@ -166,6 +171,34 @@ float redistError(float deltaColor, float deltaMax) {
   }
 }
 
+vec4 featureDetection(sampler2D imSampler, vec2 position) {
+  // Compute filter radius
+  // const float sd = 0.5 * w * pixelsPerDegree;
+  // const int radius = int(ceil(3.0 * sd));
+  const int radius = 1;
+  const int diameter = radius * 2 + 1;
+
+  // Hard-coded filters
+  const vec3 edgeFilter = vec3(-1.0, 0.0, 1.0);
+  const vec3 pointFilter = vec3(0.5, -1.0, 0.5);
+
+  vec4 delta = vec4(0.0, 0.0, 0.0, 0.0);
+  // Compute 2D Gaussian
+  for (int i = 0; i < diameter; ++i) {
+    float d = float(i - radius);
+    float L;
+    // Horizontal
+    L = xyz2lum(rgb2xyzMatrix * lookupOffset(imSampler, position, vec2(d, 0.0)));
+    delta[0] += L * edgeFilter[i];
+    delta[2] += L * pointFilter[i];
+    // Vertical
+    L = xyz2lum(rgb2xyzMatrix * lookupOffset(imSampler, position, vec2(0.0, d)));
+    delta[1] += L * edgeFilter[i];
+    delta[3] += L * pointFilter[i];
+  }
+  return delta;
+}
+
 vec3 flip_simplified(sampler2D imASampler, sampler2D imBSampler, vec2 position) {
   // Compute Color Loss
   vec3 aRGB = texture2D(imASampler, position).rgb;
@@ -186,7 +219,18 @@ vec3 flip_simplified(sampler2D imASampler, sampler2D imBSampler, vec2 position) 
   float deltaMax = diffHyab(greenHunt, blueHunt);
   deltaColor = redistError(deltaColor, deltaMax);
 
-  return vec3(deltaColor, deltaColor, deltaColor);
+  // Structure
+  vec4 featA = featureDetection(imASampler, position);
+  vec4 featB = featureDetection(imBSampler, position);
+  float deltaEdge = abs(length(featA.xy) - length(featB.xy));
+  float deltaPoint = abs(length(featA.xy) - length(featB.xy));
+  const float qf = 0.5;
+  float deltaFeature = max(deltaEdge, deltaPoint);
+  deltaFeature = pow((1.0 / sqrt(2.0)) * deltaFeature, qf);
+
+  // Combine
+  float deltaFlip = pow(deltaColor, 1.0 - deltaFeature);
+  return vec3(deltaFlip, deltaFlip, deltaFlip);
 }
 
 void main(void) {
