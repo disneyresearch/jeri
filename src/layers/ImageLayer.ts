@@ -40,6 +40,7 @@ varying vec2 vTextureCoord;
 uniform sampler2D imASampler;
 uniform sampler2D imBSampler;
 uniform sampler2D cmapSampler;
+uniform mat3 rgb2xyzMatrix;
 
 vec3 lookupOffset(sampler2D sampler, vec2 position, vec2 offset) {
     // Read neighbouring pixels from an image texture
@@ -100,6 +101,138 @@ vec3 applyViewTransform(vec3 rgb, int which) {
   }
 }
 
+const float labDelta = 6.0/29.0;
+const float labDelta2 = labDelta * labDelta;
+const float labDelta3 = labDelta * labDelta2;
+float labGammaTransform(float f) {
+  if (f > labDelta3) {
+    return pow(f, 1.0/3.0);
+  }
+  else {
+    return f / (3.0*labDelta2) + 4.0/29.0;
+  }
+}
+
+vec3 xyz2Lab(vec3 colorXYZ) {
+  // https://en.wikipedia.org/wiki/CIELAB_color_space#CIELAB%E2%80%93CIEXYZ_conversions
+  vec3 whiteTS = rgb2xyzMatrix * vec3(1.0, 1.0, 1.0);
+  vec3 normalizedXYZ = colorXYZ / whiteTS;
+
+  // This must be possible more elegantly
+  vec3 gammaXYZ = vec3(
+    labGammaTransform(normalizedXYZ.x),
+    labGammaTransform(normalizedXYZ.y),
+    labGammaTransform(normalizedXYZ.z)
+  );
+
+  vec3 lab = vec3(
+    116.0 * gammaXYZ.y - 16.0,
+    500.0 * (gammaXYZ.x - gammaXYZ.y),
+    200.0 * (gammaXYZ.y - gammaXYZ.z)
+  );
+
+  return lab;
+}
+
+float xyz2lum(vec3 colorXYZ) {
+  vec3 whiteTS = rgb2xyzMatrix * vec3(1.0, 1.0, 1.0);
+  return colorXYZ.y / whiteTS.y;
+}
+
+vec3 lab2hunt(vec3 colorLab) {
+  // Desaturates dark colors, since their differences are less perceptible.
+  float adjustment = min(0.01 * colorLab.x, 1.0);
+  return vec3(colorLab.x, colorLab.yz * adjustment);
+}
+
+float diffHyab(vec3 aLab, vec3 bLab){
+  vec3 delta = aLab - bLab;
+  return abs(delta.x) + length(delta.yz);
+}
+
+float redistError(float deltaColor, float deltaMax) {
+  // Exponentiate colors
+  const float exponent = 0.7;
+  deltaColor = pow(deltaColor, exponent);
+  deltaMax = pow(deltaMax, exponent);
+
+  // Set redistribution parameters
+  const float pc = 0.4;
+  const float pt = 0.95;
+  float limit = pc * deltaMax;
+
+  // Re-map error to 0-1 range. Values between 0 and
+  // pc * max_error are mapped to the range [0, pt],
+  if (deltaColor < limit) {
+    return pt / limit * deltaColor;
+  }
+  else {
+    return pt + ((deltaColor - limit) / (deltaMax - limit) * (1.0 - pt));
+  }
+}
+
+vec4 featureDetection(sampler2D imSampler, vec2 position) {
+  // Compute filter radius
+  // const float sd = 0.5 * w * pixelsPerDegree;
+  // const int radius = int(ceil(3.0 * sd));
+  const int radius = 1;
+  const int diameter = radius * 2 + 1;
+
+  // Hard-coded filters
+  const vec3 edgeFilter = vec3(-1.0, 0.0, 1.0);
+  const vec3 pointFilter = vec3(0.5, -1.0, 0.5);
+
+  vec4 delta = vec4(0.0, 0.0, 0.0, 0.0);
+  // Compute 2D Gaussian
+  for (int i = 0; i < diameter; ++i) {
+    float d = float(i - radius);
+    float L;
+    // Horizontal
+    L = xyz2lum(rgb2xyzMatrix * lookupOffset(imSampler, position, vec2(d, 0.0)));
+    delta[0] += L * edgeFilter[i];
+    delta[2] += L * pointFilter[i];
+    // Vertical
+    L = xyz2lum(rgb2xyzMatrix * lookupOffset(imSampler, position, vec2(0.0, d)));
+    delta[1] += L * edgeFilter[i];
+    delta[3] += L * pointFilter[i];
+  }
+  return delta;
+}
+
+vec3 flip_simplified(sampler2D imASampler, sampler2D imBSampler, vec2 position) {
+  // Compute Color Loss
+  vec3 aRGB = texture2D(imASampler, position).rgb;
+  vec3 bRGB = texture2D(imBSampler, position).rgb;
+  aRGB = clamp(aRGB, 0.0, 4096.0);
+  bRGB = clamp(bRGB, 0.0, 4096.0);
+  vec3 aXYZ = rgb2xyzMatrix * aRGB;
+  vec3 bXYZ = rgb2xyzMatrix * bRGB;
+  vec3 aLab = lab2hunt(xyz2Lab(aXYZ));
+  vec3 bLab = lab2hunt(xyz2Lab(bXYZ));
+  float deltaColor = diffHyab(aLab, bLab);
+
+  // Normalize
+  vec3 greenXYZ = rgb2xyzMatrix * vec3(0.0, 1.0, 0.0);
+  vec3 blueXYZ = rgb2xyzMatrix * vec3(0.0, 0.0, 1.0);
+  vec3 greenHunt = lab2hunt(xyz2Lab(greenXYZ));
+  vec3 blueHunt = lab2hunt(xyz2Lab(blueXYZ));
+  float deltaMax = diffHyab(greenHunt, blueHunt);
+  deltaColor = redistError(deltaColor, deltaMax);
+
+  // Structure
+  vec4 featA = featureDetection(imASampler, position);
+  vec4 featB = featureDetection(imBSampler, position);
+  float deltaEdge = abs(length(featA.xy) - length(featB.xy));
+  float deltaPoint = abs(length(featA.xy) - length(featB.xy));
+  const float qf = 0.5;
+  float deltaFeature = max(deltaEdge, deltaPoint);
+  deltaFeature = pow((1.0 / sqrt(2.0)) * deltaFeature, qf);
+
+  // Combine
+  float deltaFlip = pow(deltaColor, 1.0 - deltaFeature);
+  return vec3(deltaFlip, deltaFlip, deltaFlip);
+}
+
 void main(void) {
     vec3 col;
     vec2 position = vec2(vTextureCoord.s, vTextureCoord.t);
@@ -155,6 +288,9 @@ void main(void) {
         float denominator = (aMean * aMean + bMean * bMean + c1) * (aVar + bVar + c2);
         float ssim = numerator / denominator;
         col = vec3(1. - ssim, 1. - ssim, 1. - ssim);
+    } else if (lossFunction == ${LossFunction.FLIP}) {
+        // Simplified FLIP style loss, making a lot of assumptions
+        col = flip_simplified(imASampler, imBSampler, position);
     } else {
         col = texture2D(imASampler, position).rgb;
         if (nChannels == 1) {
@@ -228,6 +364,7 @@ interface WebGlUniforms {
   exposure: WebGLUniformLocation;
   offset: WebGLUniformLocation;
   gamma: WebGLUniformLocation;
+  rgb2xyzMatrix: WebGLUniformLocation;
   imageWidth: WebGLUniformLocation;
   imageHeight: WebGLUniformLocation;
 }
@@ -256,6 +393,7 @@ export default class ImageLayer extends Layer {
   private glUniforms: WebGlUniforms;
   private quadVertexBuffer: WebGLBuffer;
   private cmapTexture: WebGLTexture;
+  private rgb2xyzMatrix: Float32Array;
 
   constructor(canvas: HTMLCanvasElement, image: Input) {
     super(canvas, image);
@@ -268,6 +406,14 @@ export default class ImageLayer extends Layer {
 
     // Create a texture cache and load the image texture
     this.getTexture = cachedFunction(this.createTexture.bind(this));
+
+    // From https://mina86.com/2019/srgb-xyz-matrix/
+    // sRGB primaries, D65 whitepoint
+    this.rgb2xyzMatrix = new Float32Array([
+      10135552.0 / 24577794.0,  8788810.0 / 24577794.0,   4435075.0 / 24577794.0,
+       2613072.0 / 12288897.0,  8788810.0 / 12288897.0,    887015.0 / 12288897.0,
+       1425312.0 / 73733382.0,  8788810.0 / 73733382.0,  70074185.0 / 73733382.0,
+    ]);
 
     // Draw for the first time
     this.needsRerender = true;
@@ -322,6 +468,7 @@ export default class ImageLayer extends Layer {
     this.gl.uniform1f(this.glUniforms.exposure, this.tonemappingSettings.exposure);
     this.gl.uniform1f(this.glUniforms.offset, this.tonemappingSettings.offset);
     this.gl.uniform1f(this.glUniforms.gamma, this.tonemappingSettings.gamma);
+    this.gl.uniformMatrix3fv(this.glUniforms.rgb2xyzMatrix, false, this.rgb2xyzMatrix);
 
     this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT); // tslint:disable-line
 
@@ -486,6 +633,7 @@ export default class ImageLayer extends Layer {
       exposure: getUniformLocation('exposure'),
       offset: getUniformLocation('offset'),
       gamma: getUniformLocation('gamma'),
+      rgb2xyzMatrix: getUniformLocation('rgb2xyzMatrix'),
       imageWidth: getUniformLocation('imageWidth'),
       imageHeight: getUniformLocation('imageHeight'),
     };
