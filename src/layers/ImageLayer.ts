@@ -3,16 +3,17 @@ import cachedFunction from '../utils/cached-function';
 import { Image } from '../utils/image-loading';
 import Layer, { Input, LossFunction } from './Layer';
 
-enum DrawMode {
+export enum DrawMode {
   LDR = 0,
   HDR = 1,
   ColorMap = 2,
 }
 
-enum ViewTransform {
-  None = -1,
-  Gamma22 = 0,
-  K1S1 = 1,
+export enum ViewTransform {
+  None = 0,
+  Gamma22 = 1,
+  K1S1 = 2,
+  Size = 3 // not a real view transform
 }
 
 const vertexShaderSource = `
@@ -375,7 +376,12 @@ export interface TonemappingSettings {
   gamma: number;
   exposure: number;
 }
-const defaultTonemapping: TonemappingSettings = { viewTransform:0.0, exposure: 1.0, gamma: 1.0, offset: 0.0 };
+const defaultTonemapping: TonemappingSettings = {
+  viewTransform:0.0,
+  exposure: 1.0,
+  gamma: 1.0,
+  offset: 0.0,
+};
 
 export type TextureCache = (image: Image) => WebGLTexture;
 

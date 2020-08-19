@@ -60,12 +60,16 @@ export default () => {
             <td>Increase / decrease <strong>e</strong>xposure</td>
           </tr>
           <tr>
+            <th>g / G</th>
+            <td>Increase / decrease <strong>g</strong>amma</td>
+          </tr>
+          <tr>
             <th>r</th>
             <td>Reset exposure, view transform, positioning and zooming</td>
           </tr>
           <tr>
             <th>t</th>
-            <td>Toggle between the Gamma 2.2 and the Pseudo ARRI K1S1 view transforms</td>
+            <td>Toggle between the Gamma 2.2, the Pseudo ARRI K1S1 view transforms and no transform</td>
           </tr>
           <tr>
             <th>f</th>

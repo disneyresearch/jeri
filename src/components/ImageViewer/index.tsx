@@ -10,6 +10,7 @@ import requestFullscreen from '../../utils/fullscreen';
 import HelpScreen from './HelpScreen';
 import ImageFrame from '../ImageFrame';
 import { lossFunctionFromString, LossFunction } from '../../layers/Layer';
+import { ViewTransform } from '../../layers/ImageLayer';
 import ImageFrameWithLoading, { ImageSpec, ImageSpecUrl, ImageSpecLossMap } from '../ImageFrameWithLoading';
 import { NavRow } from './navigation';
 
@@ -83,6 +84,7 @@ export interface ImageViewerState {
   selection: string[];           /** List of item titles that are selected */
   viewTransform: {[tonemapGroup: string]: number}; /** Image view transform, a number between 0 and 1 for each tonemapGroup (string) */
   exposure: {[tonemapGroup: string]: number}; /** Image exposure, a number > 0 for each tonemapGroup (string) */
+  gamma: {[tonemapGroup: string]: number}; /** Image gamma, a number > 0 for each tonemapGroup (string) */
   helpIsOpen: boolean;           /** Whether the help screen overlay is currently open */
   defaultTransformation: Matrix4x4;
   transformationNeedsUpdate: boolean;
@@ -143,8 +145,9 @@ export default class ImageViewer extends React.Component<ImageViewerProps, Image
     this.state = {
       activeRow: 0,
       selection: this.getDefaultSelection(this.getMenu()).slice(1),
-      viewTransform: { default: 0.0 },
+      viewTransform: { default: 1 },
       exposure: { default: 1.0 },
+      gamma: { default: 1.0 },
       helpIsOpen: false,
       defaultTransformation: Matrix4x4.create(),
       transformationNeedsUpdate: true,
@@ -238,7 +241,7 @@ export default class ImageViewer extends React.Component<ImageViewerProps, Image
           <ImageFrameWithLoading
             viewTransform={this.state.viewTransform[imageSpec.tonemapGroup]}
             exposure={this.state.exposure[imageSpec.tonemapGroup] || 1.0}
-            gamma={1.0}
+            gamma={this.state.gamma[imageSpec.tonemapGroup] || 1.0}
             offset={0.0}
             imageSpec={imageSpec}
             ref={(frame) => this.imageFrame = (frame != null) ? frame.imageFrame : null}
@@ -264,6 +267,7 @@ export default class ImageViewer extends React.Component<ImageViewerProps, Image
           <ImageInfoLink href={imageSpec.urlB}>{imageSpec.urlB.split('/').pop()}</ImageInfoLink>
           <ImageInfoBlock>Loss: {LossFunction[imageSpec.lossFunction]}</ImageInfoBlock>
           <ImageInfoBlock>Exposure: {(this.state.exposure[imageSpec.tonemapGroup] || 1.0).toPrecision(3)}</ImageInfoBlock>
+          <ImageInfoBlock>Gamma: {(this.state.gamma[imageSpec.tonemapGroup] || 1.0).toPrecision(3)}</ImageInfoBlock>
         </ImageInfo>
       );
     } else if (imageSpec.type === 'Url') {
@@ -271,8 +275,10 @@ export default class ImageViewer extends React.Component<ImageViewerProps, Image
       return (
         <ImageInfo>
           <ImageInfoLink href={imageSpec.url}>{imageSpec.url.split('/').pop()}</ImageInfoLink>
+          <ImageInfoBlock>Transform: {ViewTransform[this.state.viewTransform[imageSpec.tonemapGroup]]}</ImageInfoBlock>
           <ImageInfoBlock>Exposure: {(this.state.exposure[imageSpec.tonemapGroup] || 1.0).toPrecision(3)}</ImageInfoBlock>
-	</ImageInfo>
+          <ImageInfoBlock>Gamma: {(this.state.gamma[imageSpec.tonemapGroup] || 1.0).toPrecision(3)}</ImageInfoBlock>
+        </ImageInfo>
       );
     } else {
       return <></>;
@@ -528,7 +534,7 @@ export default class ImageViewer extends React.Component<ImageViewerProps, Image
       const tonemapGroup = this.imageSpec(selection, this.getMenu()).tonemapGroup;
       const viewTransform = {
         ...this.state.viewTransform,
-        [tonemapGroup]: (Math.abs(this.state.viewTransform[tonemapGroup] - 1))
+        [tonemapGroup]: (this.state.viewTransform[tonemapGroup] + 1) % ViewTransform.Size
       };
       this.setState({ viewTransform });
     };
@@ -547,10 +553,24 @@ export default class ImageViewer extends React.Component<ImageViewerProps, Image
     actions.e = changeExposure(1.1);
     actions.E = changeExposure(1.0 / 1.1);
 
+    // Gamma Controlls
+    const changeGamma = (multiplier: number) => () => {
+      const selection = this.getSelection();
+      const tonemapGroup = this.imageSpec(selection, this.getMenu()).tonemapGroup;
+      const gamma = {
+        ...this.state.gamma,
+        [tonemapGroup]: multiplier * (this.state.gamma[tonemapGroup] || 1.0)
+      };
+      this.setState({ gamma });
+    };
+    actions.g = changeGamma(1.1);
+    actions.G = changeGamma(1.0 / 1.1);
+
     // Reset
     actions.r = () => {
-      this.setState({ viewTransform: { default: 0.0 } });
+      this.setState({ viewTransform: { default: 1 } });
       this.setState({ exposure: { default: 1.0 } });
+      this.setState({ gamma: { default: 1.0 } });
       if (this.imageFrame) {
         this.imageFrame.reset();
       }
