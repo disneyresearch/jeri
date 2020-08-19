@@ -45,6 +45,12 @@ uniform sampler2D imBSampler;
 uniform sampler2D cmapSampler;
 uniform mat3 rgb2xyzMatrix;
 
+// Flip Specific
+const int filterRadius = 4;
+const int filterDiameter = filterRadius * 2 + 1;
+uniform float edgeFilter[filterDiameter*filterDiameter];
+uniform float pointFilter[filterDiameter*filterDiameter];
+
 vec3 lookupOffset(sampler2D sampler, vec2 position, vec2 offset) {
     // Read neighbouring pixels from an image texture
     // Takes 'position' (range 0 - 1) and an integer pixel offset 'offset'
@@ -188,32 +194,26 @@ float redistError(float deltaColor, float deltaMax) {
 }
 
 vec4 featureDetection(sampler2D imSampler, vec2 position) {
-  // Compute filter radius
-  // const float sd = 0.5 * w * pixelsPerDegree;
-  // const int radius = int(ceil(3.0 * sd));
-  const int radius = 1;
-  const int diameter = radius * 2 + 1;
-
-  // Hard-coded filters
-  const vec3 edgeFilter = vec3(-1.0, 0.0, 1.0);
-  const vec3 pointFilter = vec3(0.5, -1.0, 0.5);
+  // const vec3 edgeFilter = vec3(-1.0, 0.0, 1.0);
+  // const vec3 pointFilter = vec3(0.5, -1.0, 0.5);
 
   vec4 delta = vec4(0.0, 0.0, 0.0, 0.0);
   // Compute 2D Gaussian
-  for (int i = 0; i < diameter; ++i) {
-    float d = float(i - radius);
-    float L;
-    vec3 rgb;
-    // Horizontal
-    rgb = preprocLossInput(lookupOffset(imSampler, position, vec2(d, 0.0)));
-    L = xyz2lum(rgb2xyzMatrix * rgb);
-    delta[0] += L * edgeFilter[i];
-    delta[2] += L * pointFilter[i];
-    // Vertical
-    rgb = preprocLossInput(lookupOffset(imSampler, position, vec2(0.0, d)));
-    L = xyz2lum(rgb2xyzMatrix * rgb);
-    delta[1] += L * edgeFilter[i];
-    delta[3] += L * pointFilter[i];
+  for (int y = 0; y < filterDiameter; ++y) {
+    for (int x = 0; x < filterDiameter; ++x) {
+      float dx = float(x - filterRadius);
+      float dy = float(y - filterRadius);
+      float L;
+      vec3 rgb;
+      // Normal
+      rgb = preprocLossInput(lookupOffset(imSampler, position, vec2(dx, dy)));
+      L = xyz2lum(rgb2xyzMatrix * rgb);
+      delta[0] += L * edgeFilter[y * filterDiameter + x];
+      delta[2] += L * pointFilter[y * filterDiameter + x];
+      // Transposed
+      delta[1] += L * edgeFilter[x * filterDiameter + y];
+      delta[3] += L * pointFilter[x * filterDiameter + y];
+    }
   }
   return delta;
 }
@@ -386,6 +386,8 @@ interface WebGlUniforms {
   rgb2xyzMatrix: WebGLUniformLocation;
   imageWidth: WebGLUniformLocation;
   imageHeight: WebGLUniformLocation;
+  edgeFilter: WebGLUniformLocation;
+  pointFilter: WebGLUniformLocation;
 }
 
 export interface TonemappingSettings {
@@ -395,6 +397,7 @@ export interface TonemappingSettings {
   exposure: number;
   hdrClip: number;
   hdrGamma: number;
+  angularResolution: number;
 }
 const defaultTonemapping: TonemappingSettings = {
   viewTransform:0.0,
@@ -403,6 +406,7 @@ const defaultTonemapping: TonemappingSettings = {
   offset: 0.0,
   hdrClip: 1024.0,
   hdrGamma: 1.0,
+  angularResolution: 2,
 };
 
 export type TextureCache = (image: Image) => WebGLTexture;
@@ -483,6 +487,41 @@ export default class ImageLayer extends Layer {
     requestAnimationFrame(this.checkRender);
   }
 
+  private normalizeFilter(filter: number[]) {
+    let sumPositive: number = 0;
+    let sumNegative: number = 0;
+    for (let w of filter) {
+      if (w > 0)
+        sumPositive += w;
+      else
+        sumNegative += -w;
+    }
+    for (let wk in filter) {
+      if (filter[wk] > 0)
+        filter[wk] /= sumPositive;
+      else
+        filter[wk] /= sumNegative;
+    }
+  }
+
+  private genFilter(angularResolution: number, radius: number) {
+    const w = 0.082;
+    // If radius is bigger than 3*sd, rounded up, it might not work
+    let sd = 0.5 * w * angularResolution;
+    let edgeFilter = [];
+    let pointFilter = [];
+    for (let y = -radius; y < radius + 1; ++y) {
+      for (let x = -radius; x < radius + 1; ++x) {
+        let g = Math.exp(-(x**2 + y**2) / (2 * sd**2));
+        edgeFilter.push(g * x);
+        pointFilter.push(g * (x**2/(sd**2) - 1));
+      }
+    }
+    this.normalizeFilter(edgeFilter);
+    this.normalizeFilter(pointFilter);
+    return [new Float32Array(edgeFilter), new Float32Array(pointFilter)];
+  }
+
   /**
    * Paint a new image
    */
@@ -499,7 +538,9 @@ export default class ImageLayer extends Layer {
     this.gl.uniform1f(this.glUniforms.hdrClip, this.tonemappingSettings.hdrClip);
     this.gl.uniform1f(this.glUniforms.hdrGamma, this.tonemappingSettings.hdrGamma);
     this.gl.uniformMatrix3fv(this.glUniforms.rgb2xyzMatrix, false, this.rgb2xyzMatrix);
-
+    let filter = this.genFilter(this.tonemappingSettings.angularResolution, 4);
+    this.gl.uniform1fv(this.glUniforms.edgeFilter, filter[0]);
+    this.gl.uniform1fv(this.glUniforms.pointFilter, filter[1]);
     this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT); // tslint:disable-line
 
     this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.quadVertexBuffer);
@@ -668,6 +709,8 @@ export default class ImageLayer extends Layer {
       rgb2xyzMatrix: getUniformLocation('rgb2xyzMatrix'),
       imageWidth: getUniformLocation('imageWidth'),
       imageHeight: getUniformLocation('imageHeight'),
+      edgeFilter: getUniformLocation('edgeFilter'),
+      pointFilter: getUniformLocation('pointFilter'),
     };
   }
 

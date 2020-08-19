@@ -86,6 +86,7 @@ export interface ImageViewerState {
   exposure: {[tonemapGroup: string]: number}; /** Image exposure, a number > 0 for each tonemapGroup (string) */
   gamma: {[tonemapGroup: string]: number}; /** Image gamma, a number > 0 for each tonemapGroup (string) */
   hdrGamma: {[tonemapGroup: string]: number}; /** Image gamma, a number > 0 for each tonemapGroup (string) */
+  angularResolution: {[tonemapGroup: string]: number}; /** The resolution per degree, a number > 0 for each tonemapGroup (string) */
   helpIsOpen: boolean;           /** Whether the help screen overlay is currently open */
   defaultTransformation: Matrix4x4;
   transformationNeedsUpdate: boolean;
@@ -150,6 +151,7 @@ export default class ImageViewer extends React.Component<ImageViewerProps, Image
       exposure: { default: 1.0 },
       gamma: { default: 1.0 },
       hdrGamma: { default: 1.0 },
+      angularResolution: { default: 2.0 },
       helpIsOpen: false,
       defaultTransformation: Matrix4x4.create(),
       transformationNeedsUpdate: true,
@@ -247,6 +249,7 @@ export default class ImageViewer extends React.Component<ImageViewerProps, Image
             offset={0.0}
             hdrGamma={this.state.hdrGamma[imageSpec.tonemapGroup] || 1.0}
             hdrClip={1024.0}
+            angularResolution={this.state.angularResolution[imageSpec.tonemapGroup] || 2}
             imageSpec={imageSpec}
             ref={(frame) => this.imageFrame = (frame != null) ? frame.imageFrame : null}
             allowMovement={true}
@@ -273,6 +276,7 @@ export default class ImageViewer extends React.Component<ImageViewerProps, Image
           <ImageInfoBlock>Exposure: {(this.state.exposure[imageSpec.tonemapGroup] || 1.0).toPrecision(3)}</ImageInfoBlock>
           <ImageInfoBlock>Gamma: {(this.state.gamma[imageSpec.tonemapGroup] || 1.0).toPrecision(3)}</ImageInfoBlock>
           <ImageInfoBlock>HDRGamma: {(this.state.hdrGamma[imageSpec.tonemapGroup] || 1.0).toPrecision(3)}</ImageInfoBlock>
+          <ImageInfoBlock>AngularResolution: {this.state.angularResolution[imageSpec.tonemapGroup]}</ImageInfoBlock>
         </ImageInfo>
       );
     } else if (imageSpec.type === 'Url') {
@@ -583,6 +587,19 @@ export default class ImageViewer extends React.Component<ImageViewerProps, Image
     };
     actions.h = changeHDR(1.1);
     actions.H = changeHDR(1.0 / 1.1);
+
+    // Angular Resolution Controlls
+    const changeAR = (delta: number) => () => {
+      const selection = this.getSelection();
+      const tonemapGroup = this.imageSpec(selection, this.getMenu()).tonemapGroup;
+      const angularResolution = {
+        ...this.state.angularResolution,
+        [tonemapGroup]: delta + (this.state.angularResolution[tonemapGroup] || 2.0)
+      };
+      this.setState({ angularResolution });
+    };
+    actions.a = changeAR(+1.0);
+    actions.A = changeAR(-1.0);
 
     // Reset
     actions.r = () => {

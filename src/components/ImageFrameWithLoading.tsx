@@ -48,6 +48,7 @@ export interface ImageFrameWithLoadingProps {
   gamma: number;
   hdrClip: number;
   hdrGamma: number;
+  angularResolution: number;
   offset: number;
   allowMovement: boolean;
   /** Optional callback to be called when the mouse moves */
@@ -109,6 +110,7 @@ export default class ImageFrameWithLoading extends
           gamma={this.props.gamma}
           hdrClip={this.props.hdrClip}
           hdrGamma={this.props.hdrGamma}
+          angularResolution={this.props.angularResolution}
           offset={this.props.offset}
           image={this.state.image}
           ref={(frame) => this.imageFrame = frame}
