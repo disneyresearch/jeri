@@ -32,6 +32,8 @@ uniform int viewTransform;
 uniform float exposure;
 uniform float offset;
 uniform float gamma;
+uniform float hdrClip;
+uniform float hdrGamma;
 uniform int mode;
 uniform int nChannels;
 uniform int lossFunction;
@@ -58,6 +60,19 @@ float log10(float a) {
 
 float luminance(vec3 rgb) {
   return dot(vec3(0.2126, 0.7152, 0.0722), rgb);
+}
+
+float hdrGammaTransform(float component, float e) {
+    if (component > 1.0)
+      return pow(component, e);
+    return component;
+}
+vec3 preprocLossInput(vec3 colorRGB) {
+  float e = 1.0 / hdrGamma;
+  colorRGB.r = hdrGammaTransform(colorRGB.r, e);
+  colorRGB.g = hdrGammaTransform(colorRGB.g, e);
+  colorRGB.b = hdrGammaTransform(colorRGB.b, e);
+  return clamp(colorRGB, 0.0, hdrClip);
 }
 
 vec3 GOG(vec3 rgb, float gain, float offset, float gamma) {
@@ -188,12 +203,15 @@ vec4 featureDetection(sampler2D imSampler, vec2 position) {
   for (int i = 0; i < diameter; ++i) {
     float d = float(i - radius);
     float L;
+    vec3 rgb;
     // Horizontal
-    L = xyz2lum(rgb2xyzMatrix * lookupOffset(imSampler, position, vec2(d, 0.0)));
+    rgb = preprocLossInput(lookupOffset(imSampler, position, vec2(d, 0.0)));
+    L = xyz2lum(rgb2xyzMatrix * rgb);
     delta[0] += L * edgeFilter[i];
     delta[2] += L * pointFilter[i];
     // Vertical
-    L = xyz2lum(rgb2xyzMatrix * lookupOffset(imSampler, position, vec2(0.0, d)));
+    rgb = preprocLossInput(lookupOffset(imSampler, position, vec2(0.0, d)));
+    L = xyz2lum(rgb2xyzMatrix * rgb);
     delta[1] += L * edgeFilter[i];
     delta[3] += L * pointFilter[i];
   }
@@ -202,10 +220,8 @@ vec4 featureDetection(sampler2D imSampler, vec2 position) {
 
 vec3 flip_simplified(sampler2D imASampler, sampler2D imBSampler, vec2 position) {
   // Compute Color Loss
-  vec3 aRGB = texture2D(imASampler, position).rgb;
-  vec3 bRGB = texture2D(imBSampler, position).rgb;
-  aRGB = clamp(aRGB, 0.0, 4096.0);
-  bRGB = clamp(bRGB, 0.0, 4096.0);
+  vec3 aRGB = preprocLossInput(texture2D(imASampler, position).rgb);
+  vec3 bRGB = preprocLossInput(texture2D(imBSampler, position).rgb);
   vec3 aXYZ = rgb2xyzMatrix * aRGB;
   vec3 bXYZ = rgb2xyzMatrix * bRGB;
   vec3 aLab = lab2hunt(xyz2Lab(aXYZ));
@@ -238,27 +254,27 @@ void main(void) {
     vec3 col;
     vec2 position = vec2(vTextureCoord.s, vTextureCoord.t);
     if (lossFunction == ${LossFunction.L1}) {
-        col = texture2D(imASampler, position).rgb;
-        col = col - texture2D(imBSampler, position).rgb;
-        col = abs(col);
+        vec3 img = preprocLossInput(texture2D(imASampler, position).rgb);
+        vec3 ref = preprocLossInput(texture2D(imBSampler, position).rgb);
+        col = abs(img - ref);
     } else if (lossFunction == ${LossFunction.MAPE}) {
-        vec3 img = texture2D(imASampler, position).rgb;
-        vec3 ref = texture2D(imBSampler, position).rgb;
+        vec3 img = preprocLossInput(texture2D(imASampler, position).rgb);
+        vec3 ref = preprocLossInput(texture2D(imBSampler, position).rgb);
         vec3 diff = img - ref;
         col = abs(diff) / (abs(ref) + 1e-2);
     } else if (lossFunction == ${LossFunction.SMAPE}) {
-        vec3 img = texture2D(imASampler, position).rgb;
-        vec3 ref = texture2D(imBSampler, position).rgb;
+        vec3 img = preprocLossInput(texture2D(imASampler, position).rgb);
+        vec3 ref = preprocLossInput(texture2D(imBSampler, position).rgb);
         vec3 diff = img - ref;
         col = 2.0 * abs(diff) / (abs(ref) + abs(img) + 2e-2);
     } else if (lossFunction == ${LossFunction.MRSE}) {
-        vec3 img = texture2D(imASampler, position).rgb;
-        vec3 ref = texture2D(imBSampler, position).rgb;
+        vec3 img = preprocLossInput(texture2D(imASampler, position).rgb);
+        vec3 ref = preprocLossInput(texture2D(imBSampler, position).rgb);
         vec3 diff = img - ref;
         col = diff * diff / (ref * ref + 1e-4);
     } else if (lossFunction == ${LossFunction.L2}) {
-        vec3 img = texture2D(imASampler, position).rgb;
-        vec3 ref = texture2D(imBSampler, position).rgb;
+        vec3 img = preprocLossInput(texture2D(imASampler, position).rgb);
+        vec3 ref = preprocLossInput(texture2D(imBSampler, position).rgb);
         vec3 diff = img - ref;
         col = diff * diff;
     } else if (lossFunction == ${LossFunction.SSIM}) {
@@ -365,6 +381,8 @@ interface WebGlUniforms {
   exposure: WebGLUniformLocation;
   offset: WebGLUniformLocation;
   gamma: WebGLUniformLocation;
+  hdrClip: WebGLUniformLocation;
+  hdrGamma: WebGLUniformLocation;
   rgb2xyzMatrix: WebGLUniformLocation;
   imageWidth: WebGLUniformLocation;
   imageHeight: WebGLUniformLocation;
@@ -375,12 +393,16 @@ export interface TonemappingSettings {
   offset: number;
   gamma: number;
   exposure: number;
+  hdrClip: number;
+  hdrGamma: number;
 }
 const defaultTonemapping: TonemappingSettings = {
   viewTransform:0.0,
   exposure: 1.0,
   gamma: 1.0,
   offset: 0.0,
+  hdrClip: 1024.0,
+  hdrGamma: 1.0,
 };
 
 export type TextureCache = (image: Image) => WebGLTexture;
@@ -474,6 +496,8 @@ export default class ImageLayer extends Layer {
     this.gl.uniform1f(this.glUniforms.exposure, this.tonemappingSettings.exposure);
     this.gl.uniform1f(this.glUniforms.offset, this.tonemappingSettings.offset);
     this.gl.uniform1f(this.glUniforms.gamma, this.tonemappingSettings.gamma);
+    this.gl.uniform1f(this.glUniforms.hdrClip, this.tonemappingSettings.hdrClip);
+    this.gl.uniform1f(this.glUniforms.hdrGamma, this.tonemappingSettings.hdrGamma);
     this.gl.uniformMatrix3fv(this.glUniforms.rgb2xyzMatrix, false, this.rgb2xyzMatrix);
 
     this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT); // tslint:disable-line
@@ -639,6 +663,8 @@ export default class ImageLayer extends Layer {
       exposure: getUniformLocation('exposure'),
       offset: getUniformLocation('offset'),
       gamma: getUniformLocation('gamma'),
+      hdrClip: getUniformLocation('hdrClip'),
+      hdrGamma: getUniformLocation('hdrGamma'),
       rgb2xyzMatrix: getUniformLocation('rgb2xyzMatrix'),
       imageWidth: getUniformLocation('imageWidth'),
       imageHeight: getUniformLocation('imageHeight'),

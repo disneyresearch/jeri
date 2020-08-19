@@ -46,6 +46,8 @@ export interface ImageFrameWithLoadingProps {
   viewTransform: number;
   exposure: number;
   gamma: number;
+  hdrClip: number;
+  hdrGamma: number;
   offset: number;
   allowMovement: boolean;
   /** Optional callback to be called when the mouse moves */
@@ -105,6 +107,8 @@ export default class ImageFrameWithLoading extends
           viewTransform={this.props.viewTransform}
           exposure={this.props.exposure}
           gamma={this.props.gamma}
+          hdrClip={this.props.hdrClip}
+          hdrGamma={this.props.hdrGamma}
           offset={this.props.offset}
           image={this.state.image}
           ref={(frame) => this.imageFrame = frame}

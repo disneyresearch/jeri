@@ -85,6 +85,7 @@ export interface ImageViewerState {
   viewTransform: {[tonemapGroup: string]: number}; /** Image view transform, a number between 0 and 1 for each tonemapGroup (string) */
   exposure: {[tonemapGroup: string]: number}; /** Image exposure, a number > 0 for each tonemapGroup (string) */
   gamma: {[tonemapGroup: string]: number}; /** Image gamma, a number > 0 for each tonemapGroup (string) */
+  hdrGamma: {[tonemapGroup: string]: number}; /** Image gamma, a number > 0 for each tonemapGroup (string) */
   helpIsOpen: boolean;           /** Whether the help screen overlay is currently open */
   defaultTransformation: Matrix4x4;
   transformationNeedsUpdate: boolean;
@@ -148,6 +149,7 @@ export default class ImageViewer extends React.Component<ImageViewerProps, Image
       viewTransform: { default: 1 },
       exposure: { default: 1.0 },
       gamma: { default: 1.0 },
+      hdrGamma: { default: 1.0 },
       helpIsOpen: false,
       defaultTransformation: Matrix4x4.create(),
       transformationNeedsUpdate: true,
@@ -243,6 +245,8 @@ export default class ImageViewer extends React.Component<ImageViewerProps, Image
             exposure={this.state.exposure[imageSpec.tonemapGroup] || 1.0}
             gamma={this.state.gamma[imageSpec.tonemapGroup] || 1.0}
             offset={0.0}
+            hdrGamma={this.state.hdrGamma[imageSpec.tonemapGroup] || 1.0}
+            hdrClip={1024.0}
             imageSpec={imageSpec}
             ref={(frame) => this.imageFrame = (frame != null) ? frame.imageFrame : null}
             allowMovement={true}
@@ -268,6 +272,7 @@ export default class ImageViewer extends React.Component<ImageViewerProps, Image
           <ImageInfoBlock>Loss: {LossFunction[imageSpec.lossFunction]}</ImageInfoBlock>
           <ImageInfoBlock>Exposure: {(this.state.exposure[imageSpec.tonemapGroup] || 1.0).toPrecision(3)}</ImageInfoBlock>
           <ImageInfoBlock>Gamma: {(this.state.gamma[imageSpec.tonemapGroup] || 1.0).toPrecision(3)}</ImageInfoBlock>
+          <ImageInfoBlock>HDRGamma: {(this.state.hdrGamma[imageSpec.tonemapGroup] || 1.0).toPrecision(3)}</ImageInfoBlock>
         </ImageInfo>
       );
     } else if (imageSpec.type === 'Url') {
@@ -565,6 +570,19 @@ export default class ImageViewer extends React.Component<ImageViewerProps, Image
     };
     actions.g = changeGamma(1.1);
     actions.G = changeGamma(1.0 / 1.1);
+
+    // HDR Controlls
+    const changeHDR = (multiplier: number) => () => {
+      const selection = this.getSelection();
+      const tonemapGroup = this.imageSpec(selection, this.getMenu()).tonemapGroup;
+      const hdrGamma = {
+        ...this.state.hdrGamma,
+        [tonemapGroup]: multiplier * (this.state.hdrGamma[tonemapGroup] || 1.0)
+      };
+      this.setState({ hdrGamma });
+    };
+    actions.h = changeHDR(1.1);
+    actions.H = changeHDR(1.0 / 1.1);
 
     // Reset
     actions.r = () => {

@@ -26,6 +26,8 @@ export interface ImageFrameProps {
     viewTransform: number;
     exposure: number;
     gamma: number;
+    hdrClip: number;
+    hdrGamma: number;
     offset: number;
     allowMovement: boolean;
     /** Optional callback to be called when the mouse moves */
@@ -123,12 +125,16 @@ export default class ImageFrame extends React.Component<ImageFrameProps, {}> {
         previousProps.viewTransform !== this.props.viewTransform ||
         previousProps.exposure !== this.props.exposure ||
         previousProps.gamma !== this.props.gamma ||
+        previousProps.hdrClip !== this.props.hdrClip ||
+        previousProps.hdrGamma !== this.props.hdrGamma ||
         previousProps.offset !== this.props.offset) {
       this.imageLayer.setTonemapping({
         viewTransform: this.props.viewTransform,
         exposure: this.props.exposure,
         offset: this.props.offset,
-        gamma: this.props.gamma
+        gamma: this.props.gamma,
+        hdrClip: this.props.hdrClip,
+        hdrGamma: this.props.hdrGamma
       });
     }
     if (!previousProps || previousProps.image !== this.props.image) {
