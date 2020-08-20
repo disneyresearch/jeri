@@ -16,7 +16,7 @@ const config = {
     publicPath: './',
   },
   resolve: {
-    extensions: ['.ts', '.tsx', '.js', '.json']
+    extensions: ['.ts', '.tsx', '.js', '.json', '.glsl']
   },
   module: {
     rules: [
@@ -40,6 +40,17 @@ const config = {
         test: /\.wasm$/,
         type: "javascript/auto",
       },
+      {
+        test: /\.glsl$/,
+        use: [
+          {
+            loader: 'raw-loader',
+            options: {
+              esModule: false,
+            },
+          },
+        ]
+      }
     ]
   },
   mode: 'production',

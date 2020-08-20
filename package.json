@@ -23,6 +23,7 @@
     "lodash": "^4.17.19",
     "memoize-one": "^5.1.1",
     "normalize-wheel": "1.0.1",
+    "raw-loader": "^4.0.1",
     "styled-components": "4.2.0"
   },
   "devDependencies": {
@@ -45,8 +46,9 @@
   "scripts": {
     "install": "npm run build-npm",
     "build": "npm run build-npm && npm run build-web",
-    "build-npm": "tsc && cp -r ./src/exr-wrap build_npm && cp -r ./src/utils/exr-parser.worker.js build_npm/utils",
+    "build-npm": "tsc && cp -r ./src/exr-wrap ./src/shaders build_npm && cp -r ./src/utils/exr-parser.worker.js build_npm/utils",
     "build-web": "webpack",
+    "develop": "npm run build-npm && webpack -d --mode=development",
     "clean": "rm -rf build build_web/jeri* build_web/*.js build_web/*.wasm build_web/*.map build_npm",
     "docs": "typedoc --out documentation src",
     "lint": "tslint -c tslint.json 'src/**/*.ts' 'src/**/*.tsx'",
