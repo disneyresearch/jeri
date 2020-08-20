@@ -16,8 +16,8 @@ export enum ViewTransform {
   Size = 3 // not a real view transform
 }
 
-let vertexShaderSource : string = require('raw-loader!../shaders/vertex.glsl');
-let fragmentShaderSource : string = require('raw-loader!../shaders/frag.glsl');
+let vertexShaderSource : string = require('!!raw-loader?esModule=false!../shaders/vertex.glsl');
+let fragmentShaderSource : string = require('!!raw-loader?esModule=false!../shaders/frag.glsl');
 
 const flipFilterRadius = 3; // must be kept in sync with the frag.glsl
 
