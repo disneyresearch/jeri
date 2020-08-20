@@ -19,6 +19,15 @@ export enum ViewTransform {
 let vertexShaderSource : string = require('raw-loader!../shaders/vertex.glsl');
 let fragmentShaderSource : string = require('raw-loader!../shaders/frag.glsl');
 
+const flipFilterRadius = 3; // must be kept in sync with the frag.glsl
+
+interface FlipFilter {
+  angularResolution: number;
+  radius: number;
+  edge: Float32Array;
+  point: Float32Array;
+};
+
 const imageVertices = new Float32Array([
   // X   Y     Z      U    V
   -1.0, -1.0,  0.0,   0.0, 1.0,
@@ -126,6 +135,7 @@ export default class ImageLayer extends Layer {
   private quadVertexBuffer: WebGLBuffer;
   private cmapTexture: WebGLTexture;
   private rgb2xyzMatrix: Float32Array;
+  private flipFilter: FlipFilter;
 
   constructor(canvas: HTMLCanvasElement, image: Input) {
     super(canvas, image);
@@ -146,6 +156,8 @@ export default class ImageLayer extends Layer {
        2613072.0 / 12288897.0,  8788810.0 / 12288897.0,    887015.0 / 12288897.0,
        1425312.0 / 73733382.0,  8788810.0 / 73733382.0,  70074185.0 / 73733382.0,
     ]);
+
+    this.flipFilter = this.genFilter(this.tonemappingSettings.angularResolution, flipFilterRadius);
 
     // Draw for the first time
     this.needsRerender = true;
@@ -222,6 +234,7 @@ export default class ImageLayer extends Layer {
     this.normalizeFilter(edgeFilter);
     this.normalizeFilter(pointFilter);
     return {
+      angularResolution: angularResolution,
       radius: radius,
       edge: new Float32Array(edgeFilter),
       point: new Float32Array(pointFilter)
@@ -244,9 +257,6 @@ export default class ImageLayer extends Layer {
     this.gl.uniform1f(this.glUniforms.hdrClip, this.tonemappingSettings.hdrClip);
     this.gl.uniform1f(this.glUniforms.hdrGamma, this.tonemappingSettings.hdrGamma);
     this.gl.uniformMatrix3fv(this.glUniforms.rgb2xyzMatrix, false, this.rgb2xyzMatrix);
-    let filter = this.genFilter(this.tonemappingSettings.angularResolution, 5);
-    this.gl.uniform1fv(this.glUniforms.edgeFilter, filter.edge);
-    this.gl.uniform1fv(this.glUniforms.pointFilter, filter.point);
     this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT); // tslint:disable-line
 
     this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.quadVertexBuffer);
@@ -279,6 +289,10 @@ export default class ImageLayer extends Layer {
       this.gl.activeTexture(this.gl.TEXTURE1);
       this.gl.bindTexture(this.gl.TEXTURE_2D, this.getTexture(this.image.imageB));
       this.gl.uniform1i(this.glUniforms.imBSampler, 1);
+      if (this.flipFilter.angularResolution != this.tonemappingSettings.angularResolution)
+        this.flipFilter = this.genFilter(this.tonemappingSettings.angularResolution, flipFilterRadius);
+      this.gl.uniform1fv(this.glUniforms.edgeFilter, this.flipFilter.edge);
+      this.gl.uniform1fv(this.glUniforms.pointFilter, this.flipFilter.point);
     } else {
       if (this.image.nChannels === 1) {
         this.gl.uniform1i(this.glUniforms.drawMode, DrawMode.ColorMap);

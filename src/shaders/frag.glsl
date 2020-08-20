@@ -17,7 +17,7 @@ uniform sampler2D cmapSampler;
 uniform mat3 rgb2xyzMatrix;
 
 // Flip Specific
-const int filterRadius = 5;
+const int filterRadius = 3;
 const int filterDiameter = filterRadius * 2 + 1;
 uniform float edgeFilter[filterDiameter*filterDiameter];
 uniform float pointFilter[filterDiameter*filterDiameter];
