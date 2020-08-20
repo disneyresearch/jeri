@@ -46,7 +46,7 @@ uniform sampler2D cmapSampler;
 uniform mat3 rgb2xyzMatrix;
 
 // Flip Specific
-const int filterRadius = 4;
+const int filterRadius = 5;
 const int filterDiameter = filterRadius * 2 + 1;
 uniform float edgeFilter[filterDiameter*filterDiameter];
 uniform float pointFilter[filterDiameter*filterDiameter];
@@ -194,9 +194,6 @@ float redistError(float deltaColor, float deltaMax) {
 }
 
 vec4 featureDetection(sampler2D imSampler, vec2 position) {
-  // const vec3 edgeFilter = vec3(-1.0, 0.0, 1.0);
-  // const vec3 pointFilter = vec3(0.5, -1.0, 0.5);
-
   vec4 delta = vec4(0.0, 0.0, 0.0, 0.0);
   // Compute 2D Gaussian
   for (int y = 0; y < filterDiameter; ++y) {
@@ -506,8 +503,10 @@ export default class ImageLayer extends Layer {
 
   private genFilter(angularResolution: number, radius: number) {
     const w = 0.082;
-    // If radius is bigger than 3*sd, rounded up, it might not work
     let sd = 0.5 * w * angularResolution;
+    if (radius < Math.ceil(3.0*sd)) {
+      console.warn('Filter Radius might be too small for kernel');
+    }
     let edgeFilter = [];
     let pointFilter = [];
     for (let y = -radius; y < radius + 1; ++y) {
@@ -519,7 +518,11 @@ export default class ImageLayer extends Layer {
     }
     this.normalizeFilter(edgeFilter);
     this.normalizeFilter(pointFilter);
-    return [new Float32Array(edgeFilter), new Float32Array(pointFilter)];
+    return {
+      radius: radius,
+      edge: new Float32Array(edgeFilter),
+      point: new Float32Array(pointFilter)
+    };
   }
 
   /**
@@ -538,9 +541,9 @@ export default class ImageLayer extends Layer {
     this.gl.uniform1f(this.glUniforms.hdrClip, this.tonemappingSettings.hdrClip);
     this.gl.uniform1f(this.glUniforms.hdrGamma, this.tonemappingSettings.hdrGamma);
     this.gl.uniformMatrix3fv(this.glUniforms.rgb2xyzMatrix, false, this.rgb2xyzMatrix);
-    let filter = this.genFilter(this.tonemappingSettings.angularResolution, 4);
-    this.gl.uniform1fv(this.glUniforms.edgeFilter, filter[0]);
-    this.gl.uniform1fv(this.glUniforms.pointFilter, filter[1]);
+    let filter = this.genFilter(this.tonemappingSettings.angularResolution, 5);
+    this.gl.uniform1fv(this.glUniforms.edgeFilter, filter.edge);
+    this.gl.uniform1fv(this.glUniforms.pointFilter, filter.point);
     this.gl.clear(this.gl.COLOR_BUFFER_BIT | this.gl.DEPTH_BUFFER_BIT); // tslint:disable-line
 
     this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.quadVertexBuffer);
