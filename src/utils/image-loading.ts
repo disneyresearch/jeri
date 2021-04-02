@@ -1,18 +1,5 @@
-// import ExrParserWorker = require('worker-loader?name=exr.worker.js!./exr-parser.worker.js');
-// eslint-disable-next-line import/no-webpack-loader-syntax
 // eslint-disable-next-line import/no-webpack-loader-syntax
 import ExrParserWorker from 'worker-loader!./exr-parser.worker.js';
-
-// This fails in frontend with "Uncaught SyntaxError: Unexpected token '<' I assume due to it not finding this file, but why not?
-// const worker = new Worker('./exr-parser.worker');
-// May also want to try ?name=[name].js
-
-// eslint-disable-next-line import/no-webpack-loader-syntax
-// import workerModule from 'file-loader!./exr-parser.worker';
-
-// import ExrParserWorker from 'ts-loader!worker-loader!./exr-parser.worker';
-// eslint-disable-next-line import/no-webpack-loader-syntax
-// import * as workerPath from 'file-loader?name=[name].js!./exr-parser.worker';
 
 export type Image = LdrImage | HdrImage;
 

@@ -20,23 +20,9 @@ const config = {
   },
   module: {
     rules: [
-      // {
-      //   test: /exr-parser\.worker\.js$/,
-      //   use: {
-      //     loader: 'worker-loader',
-      //     options: {
-      //       name: 'exr.worker.js',
-      //       inline: false,
-      //       fallback: false
-      //     }
-      //   }
-      // },
       {
         test: /\.worker\.js$/,
         loader: 'worker-loader',
-        // options: {
-        //   inline: "fallback",
-        // },
       },
       {
         test: /\.js$/,

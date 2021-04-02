@@ -1,20 +1,3 @@
-// declare module 'worker-loader*' {
-//     class WebpackWorker extends Worker {
-//         constructor();
-//     }
-//     export = WebpackWorker;
-// }
-
-// declare module "worker-loader!*" {
-//     // You need to change `Worker`, if you specified a different value for the `workerType` option
-//     class WebpackWorker extends Worker {
-//       constructor();
-//     }
-  
-//     // Uncomment this if you set the `esModule` option to `false`
-//     // export = WebpackWorker;
-//     export default WebpackWorker;
-// }
 declare module "*.worker.js" {
     // You need to change `Worker`, if you specified a different value for the `workerType` option
     class WebpackWorker extends Worker {
@@ -58,4 +41,3 @@ declare module "raw-loader!*" {
 declare module 'common-prefix';
 
 declare module '*exr-wrap.js';
-// declare module '*.glsl';
