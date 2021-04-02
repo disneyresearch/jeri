@@ -1,5 +1,4 @@
 const path = require('path');
-const webpack = require('webpack');
 const terser = require('terser-webpack-plugin');
 
 const config = {
@@ -20,17 +19,10 @@ const config = {
   },
   module: {
     rules: [
-      // {
-      //   test: /exr-parser\.worker\.js$/,
-      //   use: {
-      //     loader: 'worker-loader',
-      //     options: {
-      //       name: 'exr.worker.js',
-      //       inline: false,
-      //       fallback: false
-      //     }
-      //   }
-      // },
+      {
+        test: /\.worker\.js$/,
+        loader: 'worker-loader',
+      },
       {
         test: /\.js$/,
         enforce: "pre",
@@ -39,6 +31,11 @@ const config = {
       {
         test: /\.wasm$/,
         type: "javascript/auto",
+        loader: 'wasm-loader',
+      },
+      {
+        test: /\.glsl$/,
+        use: { loader: "raw-loader" },
       },
     ]
   },
@@ -75,3 +72,4 @@ const config = {
 };
 
 module.exports = config;
+

@@ -1,6 +1,6 @@
-import { Matrix4x4 } from '../utils/linalg';
 import cachedFunction from '../utils/cached-function';
 import { Image } from '../utils/image-loading';
+import { Matrix4x4 } from '../utils/linalg';
 import Layer, { Input, LossFunction } from './Layer';
 
 export enum DrawMode {
@@ -16,7 +16,9 @@ export enum ViewTransform {
   Size = 3 // not a real view transform
 }
 
+// eslint-disable-next-line import/no-webpack-loader-syntax
 let vertexShaderSource : string = require('!!raw-loader?esModule=false!../shaders/vertex.glsl');
+// eslint-disable-next-line import/no-webpack-loader-syntax
 let fragmentShaderSource : string = require('!!raw-loader?esModule=false!../shaders/frag.glsl');
 
 const flipFilterRadius = 3; // must be kept in sync with the frag.glsl

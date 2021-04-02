@@ -1,3 +1,6 @@
+// eslint-disable-next-line import/no-webpack-loader-syntax
+import ExrParserWorker from 'worker-loader!./exr-parser.worker.js';
+
 export type Image = LdrImage | HdrImage;
 
 export interface HdrImage {
@@ -17,8 +20,6 @@ export interface LdrImage {
     nChannels: number;
     data: HTMLImageElement;
 }
-
-import ExrParserWorker = require('worker-loader?name=exr.worker.js!./exr-parser.worker.js');
 
 /**
  * A pool of exr parsing webworkers that get assigned tasks in a round-robin fashion.

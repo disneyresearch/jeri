@@ -1,8 +1,7 @@
+import commonPrefix from 'common-prefix';
 import * as React from 'react';
 import styled from 'styled-components';
 import { InputNode } from './index';
-
-const commonPrefix = require('common-prefix');
 
 /** Helper to reverse string */
 const reverse = (x: string) => x.split('').reverse().join('');

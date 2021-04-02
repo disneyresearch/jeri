@@ -55,6 +55,52 @@ const data = {
 render(<ImageViewer data={data} baseUrl='' />, document.getElementById('my-container'));
 ```
 
+When using JERI as a node module (npm i -D jeri) the [exr-wrap.js](./src/exr-wrap/exr-wrap.js) file, when loaded as a module and executed in the browser, attempts to load the [exr-wrap.wasm](./src/exr-wrap/exr-wrap.wasm) from the `location.href`, see the following in the `exr-wrap.js`:
+
+```javascript
+} else if (ENVIRONMENT_IS_WEB || ENVIRONMENT_IS_WORKER) {
+    if (ENVIRONMENT_IS_WEB) {
+        if (document.currentScript) {
+            scriptDirectory = document.currentScript.src;
+        }
+    } else {
+        // This right here ->
+        scriptDirectory = self.location.href;
+    }
+```
+
+If using Create React App, for example, you'd need to serve the request that attempts to load `exr-wrap.wasm`.   [Create React App Configuration Override](https://github.com/gsoft-inc/craco) gives the ability to solve this by enhancing the dev server.
+
+Install the [craco](https://github.com/gsoft-inc/craco) module to your webapp then create a file called `craco.config.js` in the root of your project:
+
+```javascript
+const path = require("path");
+
+module.exports = {
+  webpack: {
+    alias: {
+      'react': path.resolve(__dirname, "node_modules/react/")
+    },
+  },
+  devServer: {
+    before:(app) => {
+      app.get('/static/js/exr-wrap.wasm', function(req, res, next) {
+          res.set('Content-Type', 'application/wasm');
+          res.sendFile('exr-wrap.wasm', {
+            root: path.join(__dirname, 'public'),
+            dotfiles: 'deny',
+            headers: {
+              'Content-Type': 'application/wasm'
+            }
+          });
+      });
+  }
+  }
+}
+```
+
+This will allow the automatic resolution of the `exr-wrap.wasm` in your webapp.  This will require that you copy the `exr-wrap.wasm` from jeri to your local projects `public/` folder, i.e. `/path/to/cra-project/public/exr-wrap.wasm`.  But this can be made to work with any webapp in general, and if using Node, for example, you could just add a route to serve `exr-wrap.wasm` from whatever directory you wanted.
+
 ## Contributing
 
 1. Clone this repository
@@ -63,6 +109,15 @@ render(<ImageViewer data={data} baseUrl='' />, document.getElementById('my-conta
 4. Build with `npm run build`.
 5. Contributors are required to fill out a CLA in order for us to be allowed to accept contributions. See [CLA-Individual](CLA-Individual.md) or [CLA-Corporate](CLA-Corporate.md) for details.
 
+If you want to develop on JERI locally while using it in a project:
+
+```text
+cd /path/to/jeri
+npm i
+npm link
+cd /path/to/project
+npm link jeri
+```
 
 ## Contributors
 
