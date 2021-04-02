@@ -1,3 +1,19 @@
+// import ExrParserWorker = require('worker-loader?name=exr.worker.js!./exr-parser.worker.js');
+// eslint-disable-next-line import/no-webpack-loader-syntax
+// eslint-disable-next-line import/no-webpack-loader-syntax
+import ExrParserWorker from 'worker-loader!./exr-parser.worker.js';
+
+// This fails in frontend with "Uncaught SyntaxError: Unexpected token '<' I assume due to it not finding this file, but why not?
+// const worker = new Worker('./exr-parser.worker');
+// May also want to try ?name=[name].js
+
+// eslint-disable-next-line import/no-webpack-loader-syntax
+// import workerModule from 'file-loader!./exr-parser.worker';
+
+// import ExrParserWorker from 'ts-loader!worker-loader!./exr-parser.worker';
+// eslint-disable-next-line import/no-webpack-loader-syntax
+// import * as workerPath from 'file-loader?name=[name].js!./exr-parser.worker';
+
 export type Image = LdrImage | HdrImage;
 
 export interface HdrImage {
@@ -18,8 +34,6 @@ export interface LdrImage {
     data: HTMLImageElement;
 }
 
-import ExrParserWorker = require('worker-loader?name=exr.worker.js!./exr-parser.worker.js');
-
 /**
  * A pool of exr parsing webworkers that get assigned tasks in a round-robin fashion.
  */
@@ -36,6 +50,7 @@ class ExrParserPool {
         this.workers = [];
         for (let i = 0; i < nWorkers; ++i) {
             const worker = new ExrParserWorker();
+            // const worker = new Worker(workerPath as unknown as string);
             this.workers.push(worker);
             worker.onmessage = this.handleResult.bind(this);
         }
@@ -112,7 +127,9 @@ export function loadLdr(url: string): Promise<LdrImage> {
     console.time(`Downloading '${url}'`); // tslint:disable-line
     return new Promise((resolve, reject) => {
         const image = new Image();
-        image.onerror = (error) => reject(new Error(`Failed to load '${url}'.`));
+        image.src = url;
+        image.crossOrigin = '';
+        image.onerror = (event: Event | string) => reject(new Error(`Failed to load '${url}'.`));
         image.onload = () => {
             console.timeEnd(`Downloading '${url}'`); // tslint:disable-line
             try {
@@ -137,7 +154,6 @@ export function loadLdr(url: string): Promise<LdrImage> {
                 reject(new Error(`Failed to load image '${url}': ${error}`));
             }
         };
-        image.src = url;
     });
 }
 

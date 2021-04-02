@@ -32,6 +32,13 @@ const config = {
       //   }
       // },
       {
+        test: /\.worker\.js$/,
+        loader: 'worker-loader',
+        // options: {
+        //   inline: "fallback",
+        // },
+      },
+      {
         test: /\.js$/,
         enforce: "pre",
         use: [ "source-map-loader" ]
@@ -39,6 +46,11 @@ const config = {
       {
         test: /\.wasm$/,
         type: "javascript/auto",
+        loader: 'wasm-loader',
+      },
+      {
+        test: /\.glsl$/,
+        use: { loader: "raw-loader" },
       },
     ]
   },
