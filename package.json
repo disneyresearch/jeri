@@ -48,7 +48,7 @@
     "install": "npm run build-npm",
     "build": "npm run build-npm && npm run build-web",
     "build-npm": "tsc && cp -r ./src/exr-wrap ./src/shaders build_npm && cp -r ./src/utils/exr-parser.worker.js build_npm/utils",
-    "build-npm-test": "tsc && tsc src/exr-parser.worker.ts --skipLibCheck && cp -r ./src/exr-wrap ./src/shaders build_npm && cp -r ./src/utils/exr-parser.worker.js build_npm/utils",
+    "build-npm-test": "tsc && cp -r ./src/exr-wrap ./src/shaders build_npm && cp -r ./src/utils/exr-parser.worker.js build_npm/utils",
     "build-web": "webpack",
     "develop": "npm run build-npm && webpack -d --mode=development",
     "clean": "rm -rf build build_web/jeri* build_web/*.js build_web/*.wasm build_web/*.map build_npm",
