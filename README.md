@@ -12,6 +12,7 @@ See [jeri.io](https://jeri.io/) for a live demonstration.
 4. See the [Examples](build_web/examples/) for use instructions. The examples can be opened in a browser by running a web-server in the `build_web` directory and then opening http://localhost:3000/examples in a browser.
 
 To run a webserver for viewing the examples, use one of the following:
+
 ```bash
 python -m SimpleHTTPServer 3000 # Python 2
 python3 -m http.server 3000 # Python 3
@@ -101,6 +102,21 @@ module.exports = {
 
 This will allow the automatic resolution of the `exr-wrap.wasm` in your webapp.
 
+If hosting your static app in NodeJs/Express then you'll want the following:
+
+```javascript
+app.get('/static/js/exr-wrap.wasm', async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+  res.set('Content-Type', 'application/wasm');
+  res.sendFile(path.join(__dirname, '/public/exr-wrap.wasm'));
+});
+
+app.get('*', async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+  res.sendFile(path.join(__dirname, '/public/index.html'));
+});
+```
+
+This will tell Express to serve wasm from the given directory and also any other request should be loaded by the React App.
+
 ## Contributing
 
 1. Clone this repository
@@ -112,12 +128,14 @@ This will allow the automatic resolution of the `exr-wrap.wasm` in your webapp.
 If you want to develop on JERI locally while using it in a project:
 
 ```text
+npm i -g npm-sync
 cd /path/to/jeri
 npm i
-npm link
+npm-sync --dest /path/to/project
 cd /path/to/project
-npm link jeri
 ```
+
+Note that the `/path/to/project` is the path to the root directory of your React app (or any webapp using jeri).  Do not use `npm link` due to issues cited in [npm-sync](https://github.com/sunknudsen/npm-sync#readme), which resolves those issues, primarily being duplicate React libs being included or seen when using `npm-link`.
 
 ## Contributors
 
