@@ -59,4 +59,3 @@
   "main": "build_npm/jeri.js",
   "types": "build_npm/jeri.d.ts"
 }
-

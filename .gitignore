@@ -2,3 +2,4 @@ node_modules/
 /documentation/
 /build_web/
 /build_npm/
+package.lock

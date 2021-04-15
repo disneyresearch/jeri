@@ -139,6 +139,7 @@ export function loadLdr(url: string): Promise<LdrImage> {
             }
         };
         image.src = url;
+        image.crossOrigin = "";
     });
 }
 
