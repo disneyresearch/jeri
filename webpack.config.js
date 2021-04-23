@@ -22,6 +22,11 @@ const config = {
       {
         test: /\.worker\.js$/,
         loader: 'worker-loader',
+        options: {
+          filename: "[name].js",
+          inline: "fallback",
+          esModule: false,
+        },
       },
       {
         test: /\.js$/,
@@ -42,7 +47,7 @@ const config = {
   mode: 'production',
   devtool: "source-map",
   optimization: {
-    minimize: true,
+    minimize: false,
     minimizer: [
       new terser({
         cache: true,
@@ -69,6 +74,9 @@ const config = {
       umd: 'react-dom',
     },
   },
+  node: {
+    fs: 'empty'
+  }
 };
 
 module.exports = config;

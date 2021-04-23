@@ -1,5 +1,5 @@
 // eslint-disable-next-line import/no-webpack-loader-syntax
-import ExrParserWorker from 'worker-loader!./exr-parser.worker.js';
+import ExrParserWorker from './exr-parser.worker.js';
 
 export type Image = LdrImage | HdrImage;
 
