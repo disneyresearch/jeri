@@ -60,6 +60,21 @@ class ExrParserPool {
         });
     }
 
+    parseData(url: string, data: ArrayBuffer): Promise<HdrImage> {
+        return new Promise((resolve, reject) => {
+            const worker = this.nextWorker();
+            const jobId = this.jobId++;
+            this.returnHandlers[jobId] = (event: MessageEvent) => {
+                if (event.data.success) {
+                    resolve({ url, ...event.data.image } as HdrImage);
+                } else {
+                    reject(new Error(event.data.message as string));
+                }
+            };
+            worker.postMessage({ jobId, data }, [data]);
+        });
+    }
+
     /**
      * Handler that gets called whenever a result comes back from the webworkers
      * It looks up the corresponding handler by the jobId.
@@ -88,13 +103,26 @@ const pool = new ExrParserPool(2);
 function parseExr(url: string, data: ArrayBuffer): Promise<HdrImage> {
     return pool.parse(url, data);
 }
+function parseExrData(url: string, data: ArrayBuffer): Promise<HdrImage> {
+    return pool.parseData(url, data);
+}
 
 export function loadImage(url: string): Promise<Image> {
-    const suffix = url.split('.').pop();
-    if (suffix && suffix.toLocaleLowerCase() === 'exr') {
-        return loadExr(url);
+    if (url.startsWith('data:image/x-exr;base64')) {
+        // convert base64 to raw binary data held in a string
+        var byteString = atob(url.split(',')[1]);
+        // write the bytes of the string to an ArrayBuffer
+        var arrayBuffer = new ArrayBuffer(byteString.length);
+        return Promise.resolve(parseExrData('data:', arrayBuffer));
+    } else if (url.startsWith('data:image')) {
+          return loadLdr(url);
     } else {
-        return loadLdr(url);
+      const suffix = url.split('.').pop();
+      if (suffix && suffix.toLocaleLowerCase() === 'exr') {
+          return loadExr(url);
+      } else {
+          return loadLdr(url);
+      }
     }
 }
 
@@ -191,7 +219,9 @@ export class ImageCache {
     }
 
     get(url: string): Promise<Image> {
-        if (this.contains(url)) {
+        if (url.startsWith('data:')) {
+          return this.load(url);
+        } else if (this.contains(url)) {
             // console.log(`Image ${url} was in cache.`); // tslint:disable-line
             return Promise.resolve(this.images[url]);
         } else if (this.currentlyDownloading(url)) {
@@ -203,7 +233,10 @@ export class ImageCache {
     }
 
     private store(url: string, image: Image): Image {
-        if (this.currentlyDownloading(url)) {
+        // Data urls are technically already cached and don't contain the image name so don't store them
+        if (url.startsWith('data:')) {
+          return image;
+        } else if (this.currentlyDownloading(url)) {
             delete this.currentlyDownloading[url];
         }
         this.images[url] = image;
