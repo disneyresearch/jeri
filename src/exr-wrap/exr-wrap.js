@@ -578,20 +578,30 @@ var EXR = (function() {
           }
           Module["preloadedImages"] = {};
           Module["preloadedAudios"] = {};
-          var dataURIPrefix = "data:application/octet-stream;base64,";
+          var dataURIPrefix = "data:application";
 
           function isDataURI(filename) {
+            if (typeof filename === 'string') {
               return String.prototype.startsWith ? filename.startsWith(dataURIPrefix) : filename.indexOf(dataURIPrefix) === 0
+            }
+            return false;
           }
 
           function integrateWasmJS() {
               var wasmTextFile = "exr-wrap.wast";
-              var wasmBinaryFile = "exr-wrap.wasm";
+              // var wasmBinaryFile = "exr-wrap.wasm";
+              // Suprisingly adding &limit=false caused it to output to ./{hash}.wasm
+              // Note, this successfully translates the wasm into base64 inline however the following error persists:
+              // exr-wrap.js:3351 CompileError: WebAssembly.instantiate(): expected magic word 00 61 73 6d, found 76 61 72 20 @+0
+              // Which is thrown from return WebAssembly.instantiate(binary, info)
+              // var wasmBinaryFile = require("url-loader?esModule=false&mimetype=application/wasm!./exr-wrap.wasm");
+              var wasmBinaryFile = require("./exr-wrap.wasm");
+              // var wasmBinaryFile = "exr-wrap.wasm";
               var asmjsCodeFile = "exr-wrap.temp.asm.js";
               if (!isDataURI(wasmTextFile)) {
                   wasmTextFile = locateFile(wasmTextFile)
               }
-              if (!isDataURI(wasmBinaryFile)) {
+              if (!isDataURI(wasmBinaryFile) && typeof wasmBinaryFile !== "function") {
                   wasmBinaryFile = locateFile(wasmBinaryFile)
               }
               if (!isDataURI(asmjsCodeFile)) {
@@ -695,13 +705,19 @@ var EXR = (function() {
 
                   function instantiateArrayBuffer(receiver) {
                       getBinaryPromise().then((function(binary) {
+                          console.log(`binary: ${binary}`);
                           return WebAssembly.instantiate(binary, info)
                       })).then(receiver).catch((function(reason) {
                           err("failed to asynchronously prepare wasm: " + reason);
                           abort(reason)
                       }))
                   }
-                  if (!Module["wasmBinary"] && typeof WebAssembly.instantiateStreaming === "function" && !isDataURI(wasmBinaryFile) && typeof fetch === "function") {
+                  
+                  if (typeof wasmBinaryFile === "function") {
+                    wasmBinaryFile(info)
+                      .then(instance => receiveInstance(instance.instance))
+                      .catch(error => console.log(`Could not instantiate wasm from function: ${error}`));
+                  } else if (!Module["wasmBinary"] && typeof WebAssembly.instantiateStreaming === "function" && !isDataURI(wasmBinaryFile) && typeof fetch === "function") {
                       WebAssembly.instantiateStreaming(fetch(wasmBinaryFile, {
                           credentials: "same-origin"
                       }), info).then(receiveInstantiatedSource).catch((function(reason) {
