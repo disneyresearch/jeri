@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "outDir": "build_npm",
+    "outDir": "build",
     "target": "es5",
     "module": "esnext",
     "lib": ["es6", "dom", "webworker", "scripthost"],

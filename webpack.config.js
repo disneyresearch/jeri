@@ -1,13 +1,13 @@
 const path = require('path');
-const terser = require('terser-webpack-plugin');
+const TerserPlugin = require('terser-webpack-plugin');
 
 const config = {
   entry: {
-    'jeri': './build_npm/jeri.js',
-    'jeri.min': './build_npm/jeri.js'
+    'jeri': './src/jeri.tsx',
+    'jeri.min': './src/jeri.tsx'
   },
   output: {
-    path: path.resolve(__dirname, 'build_web'),
+    path: path.resolve(__dirname, 'build'),
     filename: '[name].js',
     libraryTarget: 'umd',
     library: 'Jeri',
@@ -15,7 +15,7 @@ const config = {
     publicPath: './',
   },
   resolve: {
-    extensions: ['.ts', '.tsx', '.js', '.json', '.glsl']
+    extensions: ['.ts', '.tsx', '.js', '.json', '.glsl', '.wasm']
   },
   module: {
     rules: [
@@ -42,6 +42,11 @@ const config = {
         test: /\.glsl$/,
         use: { loader: "raw-loader" },
       },
+      {
+        test: /\.tsx?$/,
+        use: 'ts-loader',
+        exclude: /node_modules/,
+      },
     ]
   },
   mode: 'production',
@@ -49,10 +54,12 @@ const config = {
   optimization: {
     minimize: true,
     minimizer: [
-      new terser({
+      new TerserPlugin({
         cache: true,
-        parallel: true,
+        parallel: false,
         sourceMap: true,
+        include: /\.min\.js$/,
+        exclude: /exr-parser\.worker/,
         terserOptions: {
         }
       }),
@@ -76,7 +83,7 @@ const config = {
   },
   node: {
     fs: 'empty'
-  }
+  },
 };
 
 module.exports = config;

@@ -4,3 +4,11 @@ node_modules/
 /build_web/
 /build_npm/
 package.lock
+/build/*.js
+/build/*.d.ts
+/build/*.wasm
+/build/*.map
+/build/components/
+/build/images/
+/build/layers/
+/build/utils/

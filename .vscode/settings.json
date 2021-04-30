@@ -2,8 +2,7 @@
     "search.exclude": {
         "**/node_modules": true,
         "**/bower_components": true,
-        "build_npm/**/*": true,
-        "build_web/**/*": true,
+        "build/**/*": true,
         "documentation": true
     }
 }

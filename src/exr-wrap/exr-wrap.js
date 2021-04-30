@@ -589,14 +589,11 @@ var EXR = (function() {
 
           function integrateWasmJS() {
               var wasmTextFile = "exr-wrap.wast";
-              // var wasmBinaryFile = "exr-wrap.wasm";
-              // Suprisingly adding &limit=false caused it to output to ./{hash}.wasm
-              // Note, this successfully translates the wasm into base64 inline however the following error persists:
-              // exr-wrap.js:3351 CompileError: WebAssembly.instantiate(): expected magic word 00 61 73 6d, found 76 61 72 20 @+0
-              // Which is thrown from return WebAssembly.instantiate(binary, info)
-              // var wasmBinaryFile = require("url-loader?esModule=false&mimetype=application/wasm!./exr-wrap.wasm");
+              // Note that we always want to require here and not let the fallback be to load via XMLHttpRequest if it's text.
+              // The issue here is that in a parent npm project that requires jeri, if this exr-wrap.js and below requires isn't pre-processed
+              // with webpack, then the parent project doesn't know what to do with it, or we require the parent project to deal with it,
+              // which really isn't an option, therefore require the wasm and handle it here.
               var wasmBinaryFile = require("./exr-wrap.wasm");
-              // var wasmBinaryFile = "exr-wrap.wasm";
               var asmjsCodeFile = "exr-wrap.temp.asm.js";
               if (!isDataURI(wasmTextFile)) {
                   wasmTextFile = locateFile(wasmTextFile)

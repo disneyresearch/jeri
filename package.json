@@ -29,6 +29,7 @@
     "json-loader": "0.5.7",
     "serve": "^11.3.2",
     "source-map-loader": "0.2.4",
+    "ts-loader": "^8.2.0",
     "tslint": "5.16.0",
     "tslint-react": "4.0.0",
     "typedoc": "^0.15.0",
@@ -46,17 +47,13 @@
     "styled-components": "5.2.1"
   },
   "scripts": {
-    "install": "npm run build-npm",
-    "build": "npm run build-npm && npm run build-web",
-    "build-npm": "tsc && cp -r ./src/exr-wrap ./src/shaders build_npm && cp -r ./src/utils/exr-parser.worker.js build_npm/utils",
-    "build-npm-test": "tsc && cp -r ./src/exr-wrap ./src/shaders build_npm && cp -r ./src/utils/exr-parser.worker.js build_npm/utils",
-    "build-web": "webpack",
-    "develop": "npm run build-npm && webpack -d --mode=development",
-    "clean": "rm -rf build build_web/jeri* build_web/*.js build_web/*.wasm build_web/*.map build_npm",
+    "install": "npm run build",
+    "build": "webpack --progress",
+    "develop": "webpack -d --mode=development",
+    "clean": "rm -rf build/jeri* build/*.js build/*.wasm build/*.map",
     "docs": "typedoc --out documentation src",
-    "lint": "tslint -c tslint.json 'src/**/*.ts' 'src/**/*.tsx'",
-    "examples": "serve build_web"
+    "lint": "tslint -c tslint.json 'src/**/*.ts' 'src/**/*.tsx'"
   },
-  "main": "build_npm/jeri.js",
-  "types": "build_npm/jeri.d.ts"
+  "main": "build/jeri.js",
+  "types": "build/jeri.d.ts"
 }
