@@ -49,18 +49,16 @@ function handleJob(job) {
     const jobId = job.jobId;
     try {
         const image = parseExr(job.data);
-        // eslint-disable-next-line no-restricted-globals
         self.postMessage(
             {
                 jobId,
                 success: true,
                 image
-            }, 
+            },
             [image.data.buffer]
         );
     } catch (error) {
         console.log('Error: ', error);
-        // eslint-disable-next-line no-restricted-globals
         self.postMessage({
             jobId,
             success: false,
@@ -68,7 +66,7 @@ function handleJob(job) {
         });
     }
 }
-// tslint:disable-line:no-any
+
 function parseExr(data) {
     console.time('Decoding EXR'); // tslint:disable-line
     let exrImage = null; // tslint:disable-line:no-any
@@ -76,11 +74,11 @@ function parseExr(data) {
         exrImage = OpenEXR.loadEXRStr(data);
         const channels = exrImage.channels();
         const {
-          width,
-          height
+            width,
+            height
         } = exrImage;
         let nChannels = channels.length;
-        let exrData = void 0;
+        let exrData;
         if (nChannels === 1) {
             const z = exrImage.plane(exrImage.channels()[0]);
             exrData = new Float32Array(width * height);
