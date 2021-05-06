@@ -21,13 +21,12 @@ const EXR = require("../exr-wrap/exr-wrap.js");
 
 const openEXRLoaded = false;
 const queuedJobs = [];
-const openEXR;
+const OpenEXR;
 
 self.addEventListener('message', function (event) {
     if (!openEXRLoaded) {
         queuedJobs.push(event.data);
-    }
-    else {
+    } else {
         handleJob(event.data);
     }
 });
@@ -37,7 +36,7 @@ const wasmBinary = require('../exr-wrap/exr-wrap.wasm');
 EXR({
   instantiateWasm: wasmBinary
 }).then(function (Module) {
-    openEXR = Module;
+    OpenEXR = Module;
     openEXRLoaded = true;
     while (queuedJobs.length > 0) {
         var job = queuedJobs.shift();
@@ -49,15 +48,17 @@ EXR({
 function handleJob(job) {
     const jobId = job.jobId;
     try {
-        var image = parseExr(job.data);
+        const image = parseExr(job.data);
         // eslint-disable-next-line no-restricted-globals
-        self.postMessage({
-            jobId,
-            success: true,
-            image
-        }, [image.data.buffer]);
-    }
-    catch (error) {
+        self.postMessage(
+            {
+                jobId,
+                success: true,
+                image
+            }, 
+            [image.data.buffer]
+        );
+    } catch (error) {
         console.log('Error: ', error);
         // eslint-disable-next-line no-restricted-globals
         self.postMessage({
@@ -72,9 +73,9 @@ function parseExr(data) {
     console.time('Decoding EXR'); // tslint:disable-line
     let exrImage = null; // tslint:disable-line:no-any
     try {
-        exrImage = openEXR.loadEXRStr(data);
+        exrImage = OpenEXR.loadEXRStr(data);
         const channels = exrImage.channels();
-        const width = {
+        const {
           width,
           height
         } = exrImage;
@@ -86,8 +87,7 @@ function parseExr(data) {
             for (let i = 0; i < width * height; i++) {
                 exrData[i] = z[i];
             }
-        }
-        else if (exrImage.channels().includes('R') &&
+        } else if (exrImage.channels().includes('R') &&
             exrImage.channels().includes('G') &&
             exrImage.channels().includes('B')) {
             const r = exrImage.plane('R');
@@ -100,19 +100,17 @@ function parseExr(data) {
                 exrData[i * 3 + 2] = b[i];
             }
             nChannels = 3;
-        }
-        else {
+        } else {
             throw new Error('EXR image not supported');
         }
         return {
-            height: height,
-            width: width,
-            nChannels: nChannels,
+            height,
+            width,
+            nChannels,
             data: exrData,
             type: 'HdrImage',
         };
-    }
-    finally {
+    } finally {
         if (exrImage) {
             exrImage.delete();
         }
