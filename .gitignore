@@ -12,3 +12,4 @@ package.lock
 /build/images/
 /build/layers/
 /build/utils/
+*.swp
