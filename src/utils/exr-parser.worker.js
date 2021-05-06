@@ -17,17 +17,13 @@
  *  };
  */
 
-exports.__esModule = true;
+const EXR = require("../exr-wrap/exr-wrap.js");
 
-var EXR = require("../exr-wrap/exr-wrap.js");
+const openEXRLoaded = false;
+const queuedJobs = [];
+const openEXR;
 
-// eslint-disable-next-line no-restricted-globals
-var ctx = self;
-var openEXRLoaded = false;
-var queuedJobs = [];
-var openEXR;
-
-ctx.addEventListener('message', function (event) {
+self.addEventListener('message', function (event) {
     if (!openEXRLoaded) {
         queuedJobs.push(event.data);
     }
@@ -36,7 +32,11 @@ ctx.addEventListener('message', function (event) {
     }
 });
 
-EXR().then(function (Module) {
+// The wasmBinary will be read in as a function to be instantiated in the exr-wrap.js
+const wasmBinary = require('../exr-wrap/exr-wrap.wasm');
+EXR({
+  instantiateWasm: wasmBinary
+}).then(function (Module) {
     openEXR = Module;
     openEXRLoaded = true;
     while (queuedJobs.length > 0) {
@@ -47,21 +47,21 @@ EXR().then(function (Module) {
     }
 });
 function handleJob(job) {
-    var jobId = job.jobId;
+    const jobId = job.jobId;
     try {
         var image = parseExr(job.data);
         // eslint-disable-next-line no-restricted-globals
-        ctx.postMessage({
-            jobId: jobId,
+        self.postMessage({
+            jobId,
             success: true,
-            image: image
+            image
         }, [image.data.buffer]);
     }
     catch (error) {
         console.log('Error: ', error);
         // eslint-disable-next-line no-restricted-globals
-        ctx.postMessage({
-            jobId: jobId,
+        self.postMessage({
+            jobId,
             success: false,
             message: error.toString()
         });
@@ -70,28 +70,31 @@ function handleJob(job) {
 // tslint:disable-line:no-any
 function parseExr(data) {
     console.time('Decoding EXR'); // tslint:disable-line
-    var exrImage = null; // tslint:disable-line:no-any
+    let exrImage = null; // tslint:disable-line:no-any
     try {
         exrImage = openEXR.loadEXRStr(data);
-        var channels = exrImage.channels();
-        var width = exrImage.width, height = exrImage.height;
-        var nChannels = channels.length;
-        var exrData = void 0;
+        const channels = exrImage.channels();
+        const width = {
+          width,
+          height
+        } = exrImage;
+        let nChannels = channels.length;
+        let exrData = void 0;
         if (nChannels === 1) {
-            var z = exrImage.plane(exrImage.channels()[0]);
+            const z = exrImage.plane(exrImage.channels()[0]);
             exrData = new Float32Array(width * height);
-            for (var i = 0; i < width * height; i++) {
+            for (let i = 0; i < width * height; i++) {
                 exrData[i] = z[i];
             }
         }
         else if (exrImage.channels().includes('R') &&
             exrImage.channels().includes('G') &&
             exrImage.channels().includes('B')) {
-            var r = exrImage.plane('R');
-            var g = exrImage.plane('G');
-            var b = exrImage.plane('B');
+            const r = exrImage.plane('R');
+            const g = exrImage.plane('G');
+            const b = exrImage.plane('B');
             exrData = new Float32Array(width * height * 3);
-            for (var i = 0; i < width * height; i++) {
+            for (let i = 0; i < width * height; i++) {
                 exrData[i * 3] = r[i];
                 exrData[i * 3 + 1] = g[i];
                 exrData[i * 3 + 2] = b[i];
@@ -106,15 +109,13 @@ function parseExr(data) {
             width: width,
             nChannels: nChannels,
             data: exrData,
-            type: 'HdrImage'
+            type: 'HdrImage',
         };
     }
     finally {
         if (exrImage) {
-            exrImage["delete"]();
+            exrImage.delete();
         }
         console.timeEnd('Decoding EXR'); // tslint:disable-line
     }
-}
-;
-
+};

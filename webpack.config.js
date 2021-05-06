@@ -52,7 +52,7 @@ const config = {
   mode: 'production',
   devtool: "source-map",
   optimization: {
-    minimize: true,
+    minimize: false,
     minimizer: [
       new TerserPlugin({
         cache: true,
