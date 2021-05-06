@@ -19,9 +19,9 @@
 
 const EXR = require("../exr-wrap/exr-wrap.js");
 
-const openEXRLoaded = false;
-const queuedJobs = [];
-const OpenEXR;
+let openEXRLoaded = false;
+let queuedJobs = [];
+let OpenEXR;
 
 self.addEventListener('message', function (event) {
     if (!openEXRLoaded) {
