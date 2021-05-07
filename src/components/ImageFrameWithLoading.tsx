@@ -1,10 +1,10 @@
 import * as React from 'react';
-import { Matrix4x4 } from '../utils/linalg';
 import styled from 'styled-components';
-
-import ImageFrame from './ImageFrame';
-import { LossFunction, Input as ImageInput } from '../layers/Layer';
+import { Input as ImageInput, LossFunction } from '../layers/Layer';
 import { ImageCache } from '../utils/image-loading';
+import { Matrix4x4 } from '../utils/linalg';
+import ImageFrame from './ImageFrame';
+
 
 const StretchingDiv = styled.div`
   position: absolute;

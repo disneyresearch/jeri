@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width">
+  <title>Example: Viewer</title>
+  <style>
+    .stretch {
+      width: 100%;
+      height: 100%;
+      position: absolute;
+      left:0; right: 0; top:0; bottom: 0;
+    }
+    body {
+      font-family: sans-serif;
+    }
+  </style>
+</head>
+<body>
+  <div id="root" class="stretch"></div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react/16.8.6/umd/react.development.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/16.8.6/umd/react-dom.development.js"></script>
+  <script src="./jeri.js"></script>
+  <script>
+    const data = {
+      title: 'root',
+      children: [
+        {
+          title: 'Living room',
+          children: [
+            {
+              title: 'Denoised',
+              image: 'images/test_image.exr',
+            },
+            {
+              title: 'Input',
+              image: 'images/test_input.exr',
+            },
+            {
+              title: 'Reference',
+              image: 'images/test_reference.exr',
+            },
+            {
+              title: '1-SSIM',
+              tonemapGroup: 'other',
+              lossMap: {
+                function: 'SSIM',
+                imageA: 'images/test_image.exr',
+                imageB: 'images/test_reference.exr',
+              }
+            },
+            {
+              title: 'L1',
+              tonemapGroup: 'other',
+              lossMap: {
+                function: 'L1',
+                imageA: 'images/test_image.exr',
+                imageB: 'images/test_reference.exr',
+              }
+            },
+            {
+              title: 'MrSE',
+              tonemapGroup: 'other',
+              lossMap: {
+                function: 'MRSE',
+                imageA: 'images/test_image.exr',
+                imageB: 'images/test_reference.exr',
+              }
+            },
+            {
+              title: 'FLIP',
+              tonemapGroup: 'other',
+              lossMap: {
+                function: 'FLIP',
+                imageA: 'images/test_image.exr',
+                imageB: 'images/test_reference.exr',
+              }
+            },
+          ]
+        },
+        {
+          title: 'Mountains',
+          image: 'images/test_image.jpg',
+        },
+      ]
+    };
+
+    // Call renderViewer as often as you want, any time the data changes
+    // Updates are cheap, efficient, and state is preserved
+    Jeri.renderViewer(document.getElementById('root'), data);
+  </script>
+</body>
+</html>

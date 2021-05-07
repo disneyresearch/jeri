@@ -24,8 +24,11 @@ const config = {
         loader: 'worker-loader',
         options: {
           filename: "[name].js",
-          inline: "fallback",
-          esModule: false,
+          // If desired you can force the exr-parser.worker.js to be separate here by commenting out
+          // the below inline, that just says also include the worker in jeri.js so one doesn't have to
+          // also include the file in the browser.  It's convientent though it increases the size of jeri.js by 8mb
+          // The 8+mb needs to be transferred regardless when parsing exr images, so bundling it for convienience.
+          inline: 'fallback'
         },
       },
       {
@@ -59,7 +62,6 @@ const config = {
         parallel: false,
         sourceMap: true,
         include: /\.min\.js$/,
-        exclude: /exr-parser\.worker/,
         terserOptions: {
         }
       }),

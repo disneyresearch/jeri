@@ -7,9 +7,9 @@ See [jeri.io](https://jeri.io/) for a live demonstration.
 ## Getting started--quick and dirty and without Webpack
 
 1. Build the network (see Contributing section), or get the latest build.
-2. Copy `jeri.js` or `jeri.min.js`  and `exr-parser.worker.js` to your project.
+2. Copy `jeri.js` or `jeri.min.js` to your project.
 3. Add `<script src="/jeri.min.js"></script>` to your webpage.
-4. See the [Examples](build/examples/) for use instructions. The examples can be opened in a browser by running `npx serve build` then opening [http://localhost:5000](http://localhost:5000) in a browser.
+4. See the [Examples](build/examples/) for use instructions. The examples can be opened in a browser by running `npm run examples` then opening [http://localhost:5000](http://localhost:5000) in a browser.
 
 ## Getting started with Webpack
 
@@ -18,12 +18,12 @@ For users experienced with web development that build their projects with [webpa
 To use JERI Viewer in a web application that is built with webpack, run
 
 ```bash
-npm install --save react
-npm install --save react-dom
-npm install --save jeri
+npm i -D react
+npm i -D react-dom
+npm i -D jeri
 ```
 
-You can then
+You can then use the following as a template:
 
 ```jsx
 import {ImageViewer} from 'jeri';
@@ -61,10 +61,11 @@ If you want to develop on JERI locally while using it in a project:
 ```text
 cd /path/to/jeri
 npm i
-npm link
-cd /path/to/project
-npm link jeri
+npm-sync --dest /path/to/your/project
+cd /path/to/your/project
 ```
+
+There are issues with `npm link` and React which [npm-sync](https://github.com/sunknudsen/npm-sync) fixes.
 
 ## Contributors
 
@@ -74,3 +75,4 @@ JERI features contributions by the following people:
 - Thijs Vogels (Disney Research): Asynchronous EXR loading, React & webpack, UI and API improvements
 - Gerhard Röthlin (Disney Research): Emscripten, code review
 - Alessia Marra (Disney Research): Logo, graphic design
+- Samuel Mendenhall (Microsoft): Logo, graphic design

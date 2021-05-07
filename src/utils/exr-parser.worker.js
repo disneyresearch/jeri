@@ -17,7 +17,6 @@
  *  };
  */
 
-const EXR = require("../exr-wrap/exr-wrap.js");
 
 let openEXRLoaded = false;
 let queuedJobs = [];
@@ -33,8 +32,9 @@ self.addEventListener('message', function (event) {
 
 // The wasmBinary will be read in as a function to be instantiated in the exr-wrap.js
 const wasmBinary = require('../exr-wrap/exr-wrap.wasm');
+const EXR = require("../exr-wrap/exr-wrap.js");
 EXR({
-  instantiateWasm: wasmBinary
+  instantiateWasm: (info, receiveInstance) => wasmBinary(info).then(instance => receiveInstance(instance.instance))
 }).then(function (Module) {
     OpenEXR = Module;
     openEXRLoaded = true;

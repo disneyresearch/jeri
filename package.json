@@ -48,11 +48,12 @@
   },
   "scripts": {
     "install": "npm run build",
-    "build": "webpack --progress",
+    "build": "npm run clean && webpack --progress",
     "develop": "webpack -d --mode=development",
-    "clean": "rm -rf build/jeri* build/*.js build/*.wasm build/*.map",
+    "clean": "rimraf build",
     "docs": "typedoc --out documentation src",
-    "lint": "tslint -c tslint.json 'src/**/*.ts' 'src/**/*.tsx'"
+    "lint": "tslint -c tslint.json 'src/**/*.ts' 'src/**/*.tsx'",
+    "examples": "npm run build && cp -R build/* examples && serve examples"
   },
   "main": "build/jeri.js",
   "types": "build/jeri.d.ts"
