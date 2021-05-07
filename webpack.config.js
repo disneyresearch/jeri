@@ -59,7 +59,7 @@ const config = {
     minimizer: [
       new TerserPlugin({
         cache: true,
-        parallel: false,
+        parallel: true,
         sourceMap: true,
         include: /\.min\.js$/,
         terserOptions: {

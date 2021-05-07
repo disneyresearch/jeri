@@ -75,4 +75,4 @@ JERI features contributions by the following people:
 - Thijs Vogels (Disney Research): Asynchronous EXR loading, React & webpack, UI and API improvements
 - Gerhard Röthlin (Disney Research): Emscripten, code review
 - Alessia Marra (Disney Research): Logo, graphic design
-- Samuel Mendenhall (Microsoft): Logo, graphic design
+- Samuel Mendenhall (Microsoft): Embedded wasm loading, Unified build, React & webpack improvements
