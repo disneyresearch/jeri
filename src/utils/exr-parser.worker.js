@@ -22,7 +22,7 @@ let openEXRLoaded = false;
 let queuedJobs = [];
 let OpenEXR;
 
-self.addEventListener('message', function (event) {
+self.addEventListener('message', (event) => {
     if (!openEXRLoaded) {
         queuedJobs.push(event.data);
     } else {
