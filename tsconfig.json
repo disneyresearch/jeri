@@ -1,9 +1,9 @@
 {
   "compilerOptions": {
-    "outDir": "build_npm",
-    "module": "commonjs",
+    "outDir": "build",
     "target": "es5",
-    "lib": ["es6", "dom"],
+    "module": "esnext",
+    "lib": ["es6", "dom", "webworker", "scripthost"],
     "sourceMap": true,
     "allowJs": false,
     "jsx": "react",
@@ -12,11 +12,13 @@
     "forceConsistentCasingInFileNames": true,
     "noImplicitReturns": true,
     "noImplicitThis": true,
-    "noImplicitAny": true,
-    "strictNullChecks": true,
+    "noImplicitAny": false,
+    "strictNullChecks": false,
     "suppressImplicitAnyIndexErrors": true,
     "noUnusedLocals": true,
-    "declaration": true
+    "declaration": true,
+    "skipLibCheck": true,
+    "allowSyntheticDefaultImports": true
   },
   "files": [
     "./src/module_types.d.ts"
@@ -28,3 +30,4 @@
     "./node_modules/**/*"
   ]
 }
+

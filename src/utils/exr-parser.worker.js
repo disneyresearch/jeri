@@ -17,6 +17,7 @@
  *  };
  */
 
+
 let openEXRLoaded = false;
 let queuedJobs = [];
 let OpenEXR;
@@ -29,23 +30,21 @@ self.addEventListener('message', (event) => {
     }
 });
 
-
-const exrwrapPath = require('file-loader?name=exr-wrap.js!../exr-wrap/exr-wrap.js');
-const exrwrapWasmPath = require('file-loader?name=exr-wrap.wasm!../exr-wrap/exr-wrap.wasm');
-
-importScripts(exrwrapPath);
-
-EXR().then(function(Module) {
-	OpenEXR = Module;
-	openEXRLoaded = true;
-	while (queuedJobs.length > 0) {
-		const job = queuedJobs.shift();
-		if (job) {
-			handleJob(job);
-		}
-	}
+// The wasmBinary will be read in as a function to be instantiated in the exr-wrap.js
+const wasmBinary = require('../exr-wrap/exr-wrap.wasm');
+const EXR = require("../exr-wrap/exr-wrap.js");
+EXR({
+  instantiateWasm: (info, receiveInstance) => wasmBinary(info).then(instance => receiveInstance(instance.instance))
+}).then(function (Module) {
+    OpenEXR = Module;
+    openEXRLoaded = true;
+    while (queuedJobs.length > 0) {
+        var job = queuedJobs.shift();
+        if (job) {
+            handleJob(job);
+        }
+    }
 });
-
 function handleJob(job) {
     const jobId = job.jobId;
     try {

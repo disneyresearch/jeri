@@ -6,17 +6,10 @@ See [jeri.io](https://jeri.io/) for a live demonstration.
 
 ## Getting started--quick and dirty and without Webpack
 
-1. Build the network (see Contributing section), or [get the latest build](#).
-2. Copy `jeri.js`, `exr-warp.js`, `exr-warp.wasm` and `exr.worker.js` to your project.
-3. Add `<script src="/jeri.js"></script>` to your webpage.
-4. See the [Examples](build_web/examples/) for use instructions. The examples can be opened in a browser by running a web-server in the `build_web` directory and then opening http://localhost:3000/examples in a browser.
-
-To run a webserver for viewing the examples, use one of the following:
-```bash
-python -m SimpleHTTPServer 3000 # Python 2
-python3 -m http.server 3000 # Python 3
-npm install -g serve && serve -s . # JavaScript
-```
+1. Build the network (see Contributing section), or get the latest build.
+2. Copy `jeri.js` or `jeri.min.js` to your project.
+3. Add `<script src="/jeri.min.js"></script>` to your webpage.
+4. See the [Examples](build/examples/) for use instructions. The examples can be opened in a browser by running `npm run examples` then opening [http://localhost:5000](http://localhost:5000) in a browser.
 
 ## Getting started with Webpack
 
@@ -25,12 +18,12 @@ For users experienced with web development that build their projects with [webpa
 To use JERI Viewer in a web application that is built with webpack, run
 
 ```bash
-npm install --save react
-npm install --save react-dom
-npm install --save jeri
+npm i -D react
+npm i -D react-dom
+npm i -D jeri
 ```
 
-You can then
+You can then use the following as a template:
 
 ```jsx
 import {ImageViewer} from 'jeri';
@@ -63,6 +56,16 @@ render(<ImageViewer data={data} baseUrl='' />, document.getElementById('my-conta
 4. Build with `npm run build`.
 5. Contributors are required to fill out a CLA in order for us to be allowed to accept contributions. See [CLA-Individual](CLA-Individual.md) or [CLA-Corporate](CLA-Corporate.md) for details.
 
+If you want to develop on JERI locally while using it in a project:
+
+```text
+cd /path/to/jeri
+npm i
+npm-sync --dest /path/to/your/project
+cd /path/to/your/project
+```
+
+There are issues with `npm link` and React which [npm-sync](https://github.com/sunknudsen/npm-sync) fixes.
 
 ## Contributors
 
@@ -72,3 +75,4 @@ JERI features contributions by the following people:
 - Thijs Vogels (Disney Research): Asynchronous EXR loading, React & webpack, UI and API improvements
 - Gerhard Röthlin (Disney Research): Emscripten, code review
 - Alessia Marra (Disney Research): Logo, graphic design
+- Samuel Mendenhall (Microsoft): Embedded wasm loading, Unified build, React & webpack improvements

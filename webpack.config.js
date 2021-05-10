@@ -1,14 +1,13 @@
 const path = require('path');
-const webpack = require('webpack');
-const terser = require('terser-webpack-plugin');
+const TerserPlugin = require('terser-webpack-plugin');
 
 const config = {
   entry: {
-    'jeri': './build_npm/jeri.js',
-    'jeri.min': './build_npm/jeri.js'
+    'jeri': './src/jeri.tsx',
+    'jeri.min': './src/jeri.tsx'
   },
   output: {
-    path: path.resolve(__dirname, 'build_web'),
+    path: path.resolve(__dirname, 'build'),
     filename: '[name].js',
     libraryTarget: 'umd',
     library: 'Jeri',
@@ -16,21 +15,22 @@ const config = {
     publicPath: './',
   },
   resolve: {
-    extensions: ['.ts', '.tsx', '.js', '.json', '.glsl']
+    extensions: ['.ts', '.tsx', '.js', '.json', '.glsl', '.wasm']
   },
   module: {
     rules: [
-      // {
-      //   test: /exr-parser\.worker\.js$/,
-      //   use: {
-      //     loader: 'worker-loader',
-      //     options: {
-      //       name: 'exr.worker.js',
-      //       inline: false,
-      //       fallback: false
-      //     }
-      //   }
-      // },
+      {
+        test: /\.worker\.js$/,
+        loader: 'worker-loader',
+        options: {
+          filename: "[name].js",
+          // If desired you can force the exr-parser.worker.js to be separate here by commenting out
+          // the below inline, that just says also include the worker in jeri.js so one doesn't have to
+          // also include the file in the browser.  It's convientent though it increases the size of jeri.js by 8mb
+          // The 8+mb needs to be transferred regardless when parsing exr images, so bundling it for convienience.
+          inline: 'fallback'
+        },
+      },
       {
         test: /\.js$/,
         enforce: "pre",
@@ -39,6 +39,16 @@ const config = {
       {
         test: /\.wasm$/,
         type: "javascript/auto",
+        loader: 'wasm-loader',
+      },
+      {
+        test: /\.glsl$/,
+        use: { loader: "raw-loader" },
+      },
+      {
+        test: /\.tsx?$/,
+        use: 'ts-loader',
+        exclude: /node_modules/,
       },
     ]
   },
@@ -47,10 +57,11 @@ const config = {
   optimization: {
     minimize: true,
     minimizer: [
-      new terser({
+      new TerserPlugin({
         cache: true,
         parallel: true,
         sourceMap: true,
+        include: /\.min\.js$/,
         terserOptions: {
         }
       }),
@@ -72,6 +83,10 @@ const config = {
       umd: 'react-dom',
     },
   },
+  node: {
+    fs: 'empty'
+  },
 };
 
 module.exports = config;
+

@@ -3,4 +3,5 @@ node_modules/
 /openexr-wrap-em/
 /documentation/
 /build_web/examples
+/build/examples
 /jeri-*.tgz

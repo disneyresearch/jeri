@@ -1,4 +1,15 @@
+.DS_Store
 node_modules/
 /documentation/
 /build_web/
 /build_npm/
+package.lock
+/build/
+/examples/*.js
+/examples/*.d.ts
+/examples/*.wasm
+/examples/*.map
+/examples/components/
+/examples/layers/
+/examples/utils/
+*.swp
